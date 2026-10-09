@@ -3,5 +3,10 @@ title = "flagboard gitleaks config"
 [extend]
 useDefault = true
 
-# Nothing is allowlisted yet. When a test needs a made-up secret-looking value, add only that fixture file
-# here, by exact path, with a comment saying the value is fake.
+# Only named test files that contain made-up, secret-looking values are allowed here. Everything else is scanned
+# in full, including these files' neighbours.
+[[allowlists]]
+description = "A made-up JWT-shaped string used to check that a JWT is rejected as an API key"
+paths = [
+  '''apps/api/src/modules/api-keys/api-key\.spec\.ts''',
+]

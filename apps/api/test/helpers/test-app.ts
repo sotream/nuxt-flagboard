@@ -1,3 +1,4 @@
+import type { AddressInfo } from 'node:net';
 import { Test } from '@nestjs/testing';
 import type { INestApplication, Type } from '@nestjs/common';
 import { hash as bcryptHash } from 'bcryptjs';
@@ -13,6 +14,8 @@ export const WEB_ORIGIN = 'http://localhost:3000';
 
 export interface TestApp {
   app: INestApplication;
+  /** Where the app listens, for tests that talk to it with a real client such as the SDK. */
+  baseUrl: string;
   http: ReturnType<typeof request>;
   dataSource: DataSource;
   close: () => Promise<void>;
@@ -44,8 +47,10 @@ export async function createTestApp(
   options.configure?.(app);
   // Listen once so supertest reuses the server instead of opening and closing one per request.
   await app.listen(0);
+  const { port } = app.getHttpServer().address() as AddressInfo;
   return {
     app,
+    baseUrl: `http://127.0.0.1:${port}`,
     http: request(app.getHttpServer()),
     dataSource: app.get(DataSource),
     close: async () => {

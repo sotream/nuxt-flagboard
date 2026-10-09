@@ -65,7 +65,7 @@ await expectStatus(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',
+      Origin: process.env.WEB_ORIGIN ?? 'http://localhost:3010',
     },
     body: JSON.stringify({ email: 'nobody@example.com', password: 'not-a-real-password' }),
   }),

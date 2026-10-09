@@ -23,7 +23,8 @@
     "db:migrate": "pnpm --filter api db:migrate",
     "db:migrate:revert": "pnpm --filter api db:migrate:revert",
     "db:migrate:generate": "pnpm --filter api db:migrate:generate",
-    "db:seed": "pnpm --filter api db:seed"
+    "db:seed": "pnpm --filter api db:seed",
+    "demo": "pnpm build && node scripts/demo-clients.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

@@ -35,12 +35,12 @@ export class EnvironmentVariables {
   @IsInt()
   @Min(1)
   @Max(65535)
-  PORT = 4000;
+  PORT = 4010;
 
   /** The only origin allowed to call cookie endpoints (checked against the `Origin` header). */
   @Expose()
   @IsUrl({ require_tld: false })
-  WEB_ORIGIN = 'http://localhost:3000';
+  WEB_ORIGIN = 'http://localhost:3010';
 
   /** Connection string for the application role (`flagboard_app`), which has data access only. */
   @Expose()

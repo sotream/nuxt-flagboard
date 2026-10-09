@@ -9,8 +9,8 @@ const valid = {
 describe('validateEnv', () => {
   it('accepts a minimal environment and fills in defaults', () => {
     const env = validateEnv(valid);
-    expect(env.PORT).toBe(4000);
-    expect(env.WEB_ORIGIN).toBe('http://localhost:3000');
+    expect(env.PORT).toBe(4010);
+    expect(env.WEB_ORIGIN).toBe('http://localhost:3010');
     expect(env.LOG_LEVEL).toBe('info');
     expect(env.ACCESS_TOKEN_TTL_SECONDS).toBe(900);
     expect(env.REFRESH_TOKEN_TTL_DAYS).toBe(7);
