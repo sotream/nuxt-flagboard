@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { navigateTo, useRoute } from '#imports';
 import type { NewFlag } from '~/components/CreateFlagForm.vue';
 import { useDebounced } from '~/composables/useDebounced';
 import { useIsAdmin } from '~/composables/useIsAdmin';
+import { useProjectEvents } from '~/composables/useProjectEvents';
 import { useResource } from '~/composables/useResource';
 import { useSession } from '~/composables/useSession';
 import { ApiError } from '~/utils/api-error';
@@ -26,6 +27,18 @@ const flags = useResource(() =>
   }),
 );
 watch([debouncedSearch, showArchived], () => void flags.reload());
+
+// Changes from other people show up without a reload. Several changes in a row cause one reload.
+let reloadTimer: ReturnType<typeof setTimeout> | undefined;
+function reloadSoon(): void {
+  clearTimeout(reloadTimer);
+  reloadTimer = setTimeout(() => void flags.reload(), 300);
+}
+onBeforeUnmount(() => clearTimeout(reloadTimer));
+const { status: liveStatus } = useProjectEvents(
+  computed(() => String(route.params.project)),
+  { onChange: reloadSoon, onReconnected: reloadSoon },
+);
 
 const list = computed(() => flags.data.value ?? []);
 const filtering = computed(() => debouncedSearch.value.trim() !== '' || showArchived.value);
@@ -59,7 +72,10 @@ async function create(flag: NewFlag): Promise<void> {
 <template>
   <section aria-labelledby="flags-title">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="flags-title" class="text-xl font-semibold">Flags</h2>
+      <div class="flex items-center gap-3">
+        <h2 id="flags-title" class="text-xl font-semibold">Flags</h2>
+        <LiveIndicator :status="liveStatus" />
+      </div>
       <button
         v-if="isAdmin && !creating"
         type="button"

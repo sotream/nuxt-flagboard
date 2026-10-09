@@ -3,14 +3,21 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../../app/utils/api-error';
 import type { FlagView } from '../../app/utils/api-types';
+import { createFakeEvents } from './helpers/fake-events';
+import type { FakeEvents } from './helpers/fake-events';
 import { createFakeSession } from './helpers/fake-session';
 import type { FakeSession } from './helpers/fake-session';
 
 const holder = vi.hoisted(() => ({
   session: undefined as unknown,
   navigateTo: undefined as unknown,
+  events: undefined as unknown,
 }));
 vi.mock('~/composables/useSession', () => ({ useSession: () => holder.session }));
+vi.mock('~/composables/useProjectEvents', () => ({
+  useProjectEvents: (...args: unknown[]) =>
+    (holder.events as { useProjectEvents: (...a: unknown[]) => unknown }).useProjectEvents(...args),
+}));
 mockNuxtImport(
   'navigateTo',
   () =>
@@ -48,6 +55,7 @@ const flag = (key: string, overrides: Partial<FlagView> = {}): FlagView =>
   }) as FlagView;
 
 let session: FakeSession;
+let events: FakeEvents;
 const mountPage = () => mountSuspended(FlagsPage, { route: '/projects/demo' });
 const URL = '/api/v1/projects/demo/flags';
 
@@ -55,6 +63,8 @@ beforeEach(() => {
   session = createFakeSession('admin');
   holder.session = session;
   holder.navigateTo = vi.fn();
+  events = createFakeEvents();
+  holder.events = events;
 });
 afterEach(() => vi.useRealTimers());
 
@@ -189,5 +199,40 @@ describe('flags page', () => {
 
     expect(wrapper.text()).toContain('A flag with this key already exists in the project.');
     expect(holder.navigateTo).not.toHaveBeenCalled();
+  });
+
+  it('reloads the list when someone changes a flag, once for a burst of changes', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    session.request.mockResolvedValue([flag('a')]);
+    const wrapper = await mountPage();
+    await flushPromises();
+    session.request.mockClear();
+    session.request.mockResolvedValue([flag('a'), flag('b')]);
+
+    events.push({ flagKey: 'a' });
+    events.push({ flagKey: 'b' });
+    events.push({ flagKey: 'a' });
+    vi.advanceTimersByTime(299);
+    expect(session.request).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(2);
+    await flushPromises();
+
+    expect(session.request).toHaveBeenCalledTimes(1);
+    expect(wrapper.findAll('ul a')).toHaveLength(2);
+  });
+
+  it('reloads when the connection comes back, and shows the connection state', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    session.request.mockResolvedValue([flag('a')]);
+    const wrapper = await mountPage();
+    await flushPromises();
+    expect(wrapper.get('[data-status]').attributes('data-status')).toBe('live');
+    session.request.mockClear();
+
+    events.reconnect();
+    vi.advanceTimersByTime(301);
+    await flushPromises();
+
+    expect(session.request).toHaveBeenCalledTimes(1);
   });
 });

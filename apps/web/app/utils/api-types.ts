@@ -1,4 +1,4 @@
-import type { AttributeValue, Rule } from '@flagboard/core';
+import type { AttributeValue, Condition, Rule } from '@flagboard/core';
 
 export type EnvironmentKey = 'dev' | 'staging' | 'prod';
 export const ENVIRONMENT_KEYS: EnvironmentKey[] = ['dev', 'staging', 'prod'];
@@ -69,4 +69,4 @@ export interface AuditPage {
   nextCursor: string | null;
 }
 
-export type { AttributeValue, Rule };
+export type { AttributeValue, Condition, Rule };
