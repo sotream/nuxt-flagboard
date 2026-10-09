@@ -1,0 +1,7 @@
+title = "flagboard gitleaks config"
+
+[extend]
+useDefault = true
+
+# Nothing is allowlisted yet. When a test needs a made-up secret-looking value, add only that fixture file
+# here, by exact path, with a comment saying the value is fake.

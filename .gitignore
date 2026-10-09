@@ -1,0 +1,37 @@
+# Dependencies and build output
+node_modules/
+dist/
+.nuxt/
+.output/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Specs and plans from the design step stay local
+docs/superpowers/
+.superpowers/
+
+# Local runtime data
+.data/
+pgdata/
+*.dump
+*.sql.gz
+*.sqlite
+
+# Environment files
+.env*
+!.env.example
+
+# Claude Code personal overrides
+.claude/settings.local.json
+CLAUDE.local.md
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Playwright output
+playwright-report/
+test-results/

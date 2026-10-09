@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Install scripts are skipped unless a package is listed here. New packages with build scripts fail install
+# until reviewed.
+allowBuilds: {}
