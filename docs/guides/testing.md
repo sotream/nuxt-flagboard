@@ -21,6 +21,9 @@
   PostgreSQL and **both database roles**, so a missing grant or a forbidden `UPDATE` on `audit_events` fails here.
   They use a separate `<database>_test` database, created by the same init script as the main one, so running them
   never touches your development data.
+  Global setup rebuilds that database, so it first takes a PostgreSQL advisory lock and holds it for the whole run: a
+  second `pnpm test:e2e` on the same machine waits for the first instead of dropping its tables mid-test. This
+  replaced an occasional failure (`snapshot.e2e-spec.ts`, other files skipped) when two runs overlapped.
 - **`apps/web` unit and component** (`test/unit`, `test/nuxt`): pure helpers in plain Vitest, components and pages
   with Vitest and `@nuxt/test-utils`. The session and the event stream are replaced by fakes there.
 - **`apps/e2e`**: one Playwright test, on purpose. It signs in, creates a flag in the browser, switches it on, and
