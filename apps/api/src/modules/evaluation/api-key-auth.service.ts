@@ -26,6 +26,8 @@ interface KeyRow {
 export class ApiKeyAuthService implements OnModuleInit, OnModuleDestroy {
   private readonly known = new Map<string, ApiKeyPrincipal>();
   private readonly unknown = new Map<string, number>();
+  /** Counts revocations, so a lookup can tell that one happened while it waited for the database. */
+  private revocations = 0;
   private subscription?: Subscription;
 
   constructor(
@@ -60,6 +62,7 @@ export class ApiKeyAuthService implements OnModuleInit, OnModuleDestroy {
     if (expires !== undefined && expires > this.now()) {
       return null;
     }
+    const revocationsBefore = this.revocations;
     const rows = await this.dataSource.query<KeyRow[]>(
       `SELECT k.id, k.kind, k.environment_id, e.key AS environment_key, e.project_id
        FROM api_keys k JOIN environments e ON e.id = k.environment_id
@@ -78,11 +81,15 @@ export class ApiKeyAuthService implements OnModuleInit, OnModuleDestroy {
       environmentKey: row.environment_key,
       projectId: row.project_id,
     };
-    this.known.set(hash, principal);
+    // A revoke that landed while the query ran found nothing to forget; caching now would keep the key alive.
+    if (this.revocations === revocationsBefore) {
+      this.known.set(hash, principal);
+    }
     return principal;
   }
 
   private forget(keyId: string): void {
+    this.revocations += 1;
     for (const [hash, principal] of this.known) {
       if (principal.keyId === keyId) {
         this.known.delete(hash);

@@ -12,9 +12,7 @@ let cleanup: RefreshTokenCleanupService;
 let userId: string;
 
 beforeAll(async () => {
-  t = await createTestApp({
-    env: { REFRESH_TOKEN_TTL_DAYS: '7', REFRESH_REVOKED_RETENTION_DAYS: '14' },
-  });
+  t = await createTestApp({ env: { REFRESH_TOKEN_TTL_DAYS: '7' } });
   cleanup = t.app.get(RefreshTokenCleanupService);
   userId = (await createUser(t.dataSource, Role.Viewer)).id;
 });
@@ -38,18 +36,18 @@ const exists = async (hash: string): Promise<boolean> =>
     .length === 1;
 
 describe('RefreshTokenCleanupService.purge', () => {
-  it('removes expired tokens and revoked tokens past the retention, and keeps the rest', async () => {
+  it('removes expired tokens, revoked or not, and keeps the rest', async () => {
     const active = await insertToken('1 day', null);
     const expired = await insertToken('-1 hour', null);
     const revokedRecently = await insertToken('1 day', '1 day'); // still needed for reuse detection
-    const revokedLongAgo = await insertToken('1 day', '15 days'); // beyond the 14-day retention
+    const expiredAndRevoked = await insertToken('-1 hour', '2 days');
 
     await cleanup.purge();
 
     expect(await exists(active)).toBe(true);
     expect(await exists(revokedRecently)).toBe(true);
     expect(await exists(expired)).toBe(false);
-    expect(await exists(revokedLongAgo)).toBe(false);
+    expect(await exists(expiredAndRevoked)).toBe(false);
   });
 
   it('works through more rows than one batch', async () => {

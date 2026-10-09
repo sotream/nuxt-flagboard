@@ -72,14 +72,6 @@ export class EnvironmentVariables {
   @Max(90)
   REFRESH_TOKEN_TTL_DAYS = 7;
 
-  /** How long revoked refresh tokens are kept. Reuse detection needs them for as long as they could be replayed. */
-  @Expose()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(365)
-  REFRESH_REVOKED_RETENTION_DAYS = 14;
-
   @Expose()
   @Type(() => Number)
   @IsInt()
@@ -93,6 +85,14 @@ export class EnvironmentVariables {
   @Min(1)
   @Max(100000)
   LOGIN_RATE_LIMIT_PER_MINUTE = 10;
+
+  /** Refresh and sign-out calls per minute per client IP. Loose: tokens cannot be guessed, this only bounds load. */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100000)
+  SESSION_RATE_LIMIT_PER_MINUTE = 120;
 
   /** Requests per minute per API key on `/v1/*`. */
   @Expose()
@@ -165,9 +165,6 @@ export function validateEnv(raw: Record<string, unknown>): EnvironmentVariables 
   const errors = validateSync(env, { skipMissingProperties: false });
   const problems = errors.flatMap((error) => Object.values(error.constraints ?? {}));
   if (errors.length === 0) {
-    if (env.REFRESH_REVOKED_RETENTION_DAYS < env.REFRESH_TOKEN_TTL_DAYS) {
-      problems.push('REFRESH_REVOKED_RETENTION_DAYS must not be below REFRESH_TOKEN_TTL_DAYS');
-    }
     if (env.APP_ENV === 'prod') {
       problems.push(...productionProblems(env));
     }

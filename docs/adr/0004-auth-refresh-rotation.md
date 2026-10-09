@@ -40,5 +40,6 @@ and a stolen token should do limited damage. Roles are `admin` (writes) and `vie
   a per-request user check if immediate revocation becomes a requirement.
 - Two browser tabs refreshing with the same cookie at the same instant look like reuse and sign the user out, so
   the web app shares one in-flight refresh per tab and serialises refreshes across tabs with a Web Lock.
-- Revoked rows are kept (default 14 days) so reuse can be detected, and a timer in the API deletes old rows.
-- Rate limits are per client IP and in memory (see the single-instance ADR); sign-in allows 10 attempts per minute.
+- Revoked rows are kept until the token's own expiry so reuse can be detected; after that the token is rejected
+  anyway. A timer in the API deletes expired rows, revoked or not.
+- Rate limits are per client IP and in memory (see the single-instance ADR); sign-in allows 10 attempts per minute, refresh and sign-out 120.

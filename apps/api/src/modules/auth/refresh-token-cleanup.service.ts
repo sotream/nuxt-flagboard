@@ -7,9 +7,9 @@ export const REFRESH_CLEANUP_BATCH_SIZE = 1000;
 const MINUTE_MS = 60 * 1000;
 
 /**
- * Deletes refresh tokens that can no longer matter: expired ones, and revoked ones older than the retention.
- * Revoked tokens are kept for a while on purpose: reuse detection needs the revoked row for as long as the token
- * could still be presented, which is why the retention may not be shorter than the token lifetime.
+ * Deletes expired refresh tokens, revoked or not. A revoked row stays until its own expiry on purpose: reuse
+ * detection needs it for as long as the token could still be presented, and after expiry the token is rejected
+ * anyway, so there is nothing left to detect.
  *
  * Runs on a timer inside the API (a single instance). Rows are deleted in batches with `SKIP LOCKED`, so a
  * second instance running the same job would not block or double-delete.
@@ -48,7 +48,7 @@ export class RefreshTokenCleanupService implements OnModuleInit, OnModuleDestroy
       total += deleted;
     } while (deleted === REFRESH_CLEANUP_BATCH_SIZE);
     if (total > 0) {
-      this.logger.log(`Removed ${total} expired or long-revoked refresh tokens`);
+      this.logger.log(`Removed ${total} expired refresh tokens`);
     }
     return total;
   }
@@ -57,11 +57,11 @@ export class RefreshTokenCleanupService implements OnModuleInit, OnModuleDestroy
     const [, affected] = (await this.dataSource.query(
       `DELETE FROM refresh_tokens WHERE id IN (
          SELECT id FROM refresh_tokens
-         WHERE expires_at < now() OR revoked_at < now() - make_interval(days => $1)
-         LIMIT $2
+         WHERE expires_at < now()
+         LIMIT $1
          FOR UPDATE SKIP LOCKED
        )`,
-      [this.env.REFRESH_REVOKED_RETENTION_DAYS, REFRESH_CLEANUP_BATCH_SIZE],
+      [REFRESH_CLEANUP_BATCH_SIZE],
     )) as [unknown, number];
     return affected;
   }

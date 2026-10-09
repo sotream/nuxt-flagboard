@@ -34,6 +34,19 @@ describe('ApiKeyAuthService', () => {
     vi.useRealTimers();
   });
 
+  it('does not cache a key that was revoked while its lookup was in flight', async () => {
+    let finishQuery: (rows: unknown[]) => void = () => undefined;
+    query.mockReturnValueOnce(new Promise((resolve) => (finishQuery = resolve)));
+    query.mockResolvedValueOnce([]);
+
+    const inFlight = service.lookup('hash-a');
+    revoked.next('key-1');
+    finishQuery([row]);
+    await inFlight;
+
+    expect(service.cached('hash-a')).toBeUndefined();
+  });
+
   it('looks a valid key up once and then serves it from memory', async () => {
     query.mockResolvedValue([row]);
 

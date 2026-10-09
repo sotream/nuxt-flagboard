@@ -73,7 +73,7 @@ evaluate it, change the rollout, evaluate again.
 - `POST /v1/evaluate` answers CORS requests from any origin without credentials, so a **client key** can be used from
   a browser on another origin. `GET /v1/snapshot` and the whole admin API send no CORS headers.
 - The admin UI is same-origin with the API: Nuxt's dev proxy in development, nginx in the web image.
-- Public routes are rate limited per API key (plus failed key attempts per address); sign-in attempts are rate limited per address.
+- Public routes are rate limited per API key (plus failed key attempts per address); sign-in (strictly) and token refresh and sign-out (loosely) are rate limited per address.
 
 ## Keys, and what a client key may know
 

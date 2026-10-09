@@ -39,10 +39,6 @@ describe('validateEnv', () => {
     ],
     ['JWT_ACCESS_SECRET is missing', { APP_ENV: 'dev', DATABASE_URL: valid.DATABASE_URL }],
     ['JWT_ACCESS_SECRET is too short', { ...valid, JWT_ACCESS_SECRET: 'short' }],
-    [
-      'the revoked-token retention is below the refresh token lifetime',
-      { ...valid, REFRESH_TOKEN_TTL_DAYS: '30', REFRESH_REVOKED_RETENTION_DAYS: '7' },
-    ],
     ['APP_ENV is unknown', { ...valid, APP_ENV: 'staging' }],
     ['DATABASE_URL is missing', { APP_ENV: 'dev', JWT_ACCESS_SECRET: valid.JWT_ACCESS_SECRET }],
     ['PORT is not a port number', { ...valid, PORT: '70000' }],

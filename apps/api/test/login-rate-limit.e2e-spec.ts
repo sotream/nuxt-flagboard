@@ -5,7 +5,9 @@ import type { TestApp } from './helpers/test-app.js';
 let t: TestApp;
 
 beforeAll(async () => {
-  t = await createTestApp({ env: { LOGIN_RATE_LIMIT_PER_MINUTE: '3' } });
+  t = await createTestApp({
+    env: { LOGIN_RATE_LIMIT_PER_MINUTE: '3', SESSION_RATE_LIMIT_PER_MINUTE: '2' },
+  });
 });
 
 afterAll(async () => {
@@ -32,5 +34,14 @@ describe('sign-in rate limit', () => {
       .set('Origin', WEB_ORIGIN)
       .send({ email: user.email, password: user.password })
       .expect(429);
+  });
+
+  it.each(['refresh', 'logout'])('limits POST /auth/%s per client IP too', async (route) => {
+    const call = () => t.http.post(`/api/v1/auth/${route}`).set('Origin', WEB_ORIGIN);
+
+    await call();
+    await call();
+    const blocked = await call().expect(429);
+    expect(blocked.headers['retry-after']).toBeDefined();
   });
 });

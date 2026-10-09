@@ -50,6 +50,7 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(200)
+  @RateLimit('session')
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -68,6 +69,7 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(204)
+  @RateLimit('session')
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,

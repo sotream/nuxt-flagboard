@@ -35,3 +35,6 @@ CLAUDE.local.md
 # Playwright output
 playwright-report/
 test-results/
+
+# a build output symlink (the trailing-slash rule above matches directories only)
+apps/web/dist

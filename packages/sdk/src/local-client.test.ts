@@ -282,6 +282,75 @@ describe('createLocalClient', () => {
       expect(client.evaluate('on', {}, false).value).toBe(true);
     });
 
+    describe('with a corrupted snapshot', () => {
+      const corruptions: [string, Record<string, unknown>][] = [
+        ['a rule without a conditions list', { rules: [{ serve: 'on' }] }],
+        ['a rule that serves neither on nor off', { rules: [{ conditions: [], serve: 'maybe' }] }],
+        ['a condition with an unknown operator', { rules: [ruleWith({ operator: 'regex' })] }],
+        ['an `in` condition without values', { rules: [ruleWith({ operator: 'in' })] }],
+        ['an `equals` condition without a value', { rules: [ruleWith({ operator: 'equals' })] }],
+        ['a condition value that is an object', { rules: [ruleWith({ value: { a: 1 } })] }],
+        ['a boolean flag with a string on value', { onValue: 'yes' }],
+        [
+          'a string flag with a boolean off value',
+          { type: 'string', onValue: 'a', offValue: false },
+        ],
+        ['a rollout above 100', { rolloutPercentage: 150 }],
+        ['a fractional rollout', { rolloutPercentage: 12.5 }],
+      ];
+
+      function ruleWith(condition: Record<string, unknown>): Record<string, unknown> {
+        return {
+          conditions: [{ attribute: 'country', operator: 'equals', ...condition }],
+          serve: 'on',
+        };
+      }
+
+      const corrupted = (change: Record<string, unknown>) =>
+        [{ ...flag({ key: 'bad', rolloutPercentage: 100 }), ...change }] as unknown as FlagConfig[];
+
+      it.each(corruptions)('refuses %s when loading', async (_label, change) => {
+        const s = await serve(snapshotHandler({ flags: corrupted(change), version: 1 }));
+        const client = createLocalClient({ baseUrl: s.url, key: KEY });
+
+        await expect(client.init()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+        expect(client.evaluate('bad', {}, false)).toEqual({ value: false, reason: 'ERROR' });
+      });
+
+      it.each(corruptions)(
+        'keeps the last good snapshot after %s arrives',
+        async (_label, change) => {
+          const state = { flags: FLAGS, version: 1 };
+          const s = await serve(snapshotHandler(state));
+          const errors: FlagboardError[] = [];
+          const client = createLocalClient({
+            baseUrl: s.url,
+            key: KEY,
+            onError: (e) => errors.push(e),
+          });
+          await client.init();
+
+          state.flags = corrupted(change);
+          state.version = 2;
+
+          expect(await client.refresh()).toBe(false);
+          expect(errors.map((e) => e.code)).toEqual(['BAD_RESPONSE']);
+          expect(client.evaluate('on', {}, false).value).toBe(true);
+        },
+      );
+    });
+
+    it('returns the default with reason ERROR instead of throwing when evaluation itself fails', async () => {
+      const s = await serve(snapshotHandler({ flags: FLAGS, version: 1 }));
+      const client = createLocalClient({ baseUrl: s.url, key: KEY });
+      await client.init();
+
+      // A JavaScript caller can pass no context at all; `half` is the flag that reads it.
+      const result = client.evaluate('half', undefined as unknown as Context, 'fallback');
+
+      expect(result).toEqual({ value: 'fallback', reason: 'ERROR' });
+    });
+
     it('shares one request between overlapping refreshes', async () => {
       const state = { flags: FLAGS, version: 1 };
       const s = await serve(snapshotHandler(state));

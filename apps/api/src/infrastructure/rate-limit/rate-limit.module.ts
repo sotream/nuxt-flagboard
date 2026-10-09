@@ -33,6 +33,12 @@ const skipUnless =
             limit: env.LOGIN_RATE_LIMIT_PER_MINUTE,
             skipIf: skipUnless('login'),
           },
+          {
+            name: 'session',
+            ttl: 60_000,
+            limit: env.SESSION_RATE_LIMIT_PER_MINUTE,
+            skipIf: skipUnless('session'),
+          },
         ],
       }),
     }),

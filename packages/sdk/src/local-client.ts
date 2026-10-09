@@ -25,17 +25,44 @@ export interface LocalClient {
   close(): void;
 }
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const isAttributeValue = (value: unknown): boolean =>
+  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
+
+const isCondition = (value: unknown): boolean =>
+  isRecord(value) &&
+  typeof value.attribute === 'string' &&
+  ((value.operator === 'equals' && isAttributeValue(value.value)) ||
+    (value.operator === 'in' &&
+      Array.isArray(value.values) &&
+      value.values.every(isAttributeValue)));
+
+const isRule = (value: unknown): boolean =>
+  isRecord(value) &&
+  (value.serve === 'on' || value.serve === 'off') &&
+  Array.isArray(value.conditions) &&
+  value.conditions.every(isCondition);
+
+/** The snapshot is data from the network: check everything `evaluate` will read, not just the top level. */
 const isFlagConfig = (value: unknown): value is FlagConfig => {
-  if (typeof value !== 'object' || value === null) return false;
-  const flag = value as Record<string, unknown>;
+  if (!isRecord(value)) return false;
+  const valueType =
+    value.type === 'boolean' ? 'boolean' : value.type === 'string' ? 'string' : undefined;
   return (
-    typeof flag.key === 'string' &&
-    (flag.type === 'boolean' || flag.type === 'string') &&
-    typeof flag.salt === 'string' &&
-    typeof flag.enabled === 'boolean' &&
-    typeof flag.rolloutPercentage === 'number' &&
-    typeof flag.killSwitch === 'boolean' &&
-    Array.isArray(flag.rules)
+    typeof value.key === 'string' &&
+    valueType !== undefined &&
+    typeof value.onValue === valueType &&
+    typeof value.offValue === valueType &&
+    typeof value.salt === 'string' &&
+    typeof value.enabled === 'boolean' &&
+    Number.isInteger(value.rolloutPercentage) &&
+    (value.rolloutPercentage as number) >= 0 &&
+    (value.rolloutPercentage as number) <= 100 &&
+    typeof value.killSwitch === 'boolean' &&
+    Array.isArray(value.rules) &&
+    value.rules.every(isRule)
   );
 };
 
@@ -139,7 +166,12 @@ export function createLocalClient(options: LocalClientOptions): LocalClient {
       if (!flags) {
         return { value: defaultValue, reason: 'ERROR' };
       }
-      return evaluate(flags.get(flagKey), context, defaultValue);
+      try {
+        return evaluate(flags.get(flagKey), context, defaultValue);
+      } catch {
+        // The snapshot is validated on load, so this is bad input from the caller (for example no context at all).
+        return { value: defaultValue, reason: 'ERROR' };
+      }
     },
 
     close() {
