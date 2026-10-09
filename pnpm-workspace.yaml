@@ -7,3 +7,8 @@ packages:
 allowBuilds:
   # Analytics for swagger-ui-dist only; its install script is not needed and not wanted.
   '@scarf/scarf': false
+  # The platform binary comes from an optional dependency (@esbuild/<platform>); the install script only double-checks it.
+  esbuild: false
+
+minimumReleaseAgeExclude:
+  - happy-dom@20.14.6

@@ -6,6 +6,9 @@ paths:
 # Nuxt web app
 
 - Nuxt 4, SPA (`ssr: false`), source under `app/`. State lives in composables, not Pinia.
+- Auto-imports are off (`imports.autoImport: false`): write `import { ref } from 'vue'` and
+  `import { useState } from '#imports'`. Pure logic goes in `app/utils/` and is tested without Nuxt (`test/unit`);
+  components and composables are tested in the Nuxt environment (`test/nuxt`).
 - The browser only calls its own origin (`/api/v1/*` through a proxy). Do not add CORS or absolute API URLs.
 - The access token stays in memory, never in `localStorage`. Refresh goes through the shared helper.
 - Every data view has loading, empty and error states. Forms have labels, error text tied to fields, and work
