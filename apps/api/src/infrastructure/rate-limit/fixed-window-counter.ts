@@ -3,8 +3,6 @@ interface Window {
   resetAt: number;
 }
 
-const PRUNE_ABOVE = 10_000;
-
 /**
  * Counts events per key in fixed time windows, in memory. It exists next to the throttler because `/v1` needs two
  * things a global throttler guard cannot do: count only failures, and key on the API key that the route's own
@@ -12,6 +10,7 @@ const PRUNE_ABOVE = 10_000;
  */
 export class FixedWindowCounter {
   private readonly windows = new Map<string, Window>();
+  private lastPrune = Number.NEGATIVE_INFINITY;
 
   constructor(
     private readonly windowMs: number,
@@ -21,8 +20,11 @@ export class FixedWindowCounter {
   /** Records one event and returns how many happened in the current window. */
   hit(key: string): number {
     const now = this.now();
-    if (this.windows.size > PRUNE_ABOVE) {
+    // At most once per window: every entry is older than a window by then, so one pass clears everything that
+    // expired, and a flood of distinct keys cannot make each hit scan the whole map.
+    if (now - this.lastPrune >= this.windowMs) {
       this.prune(now);
+      this.lastPrune = now;
     }
     const current = this.windows.get(key);
     if (!current || current.resetAt <= now) {
@@ -31,6 +33,11 @@ export class FixedWindowCounter {
     }
     current.count += 1;
     return current.count;
+  }
+
+  /** How many keys are tracked right now (expired ones included until the next prune). */
+  get size(): number {
+    return this.windows.size;
   }
 
   /** How many events are in the current window, without recording one. */

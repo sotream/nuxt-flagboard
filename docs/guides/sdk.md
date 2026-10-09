@@ -20,6 +20,9 @@ Keys belong to one environment (`dev`, `staging` or `prod`). Create them in the 
 once. A **server key** (`fb_srv_...`) is secret: keep it on servers. A **client key** (`fb_cli_...`) may be shipped in
 front-end code, because it can only evaluate flags marked client-visible and never receives rules or salts.
 
+`POST /v1/evaluate` allows cross-origin requests from any origin, so `createRemoteClient` with a client key works in a
+browser on a different origin. The snapshot and the admin API do not, so the local client is for servers.
+
 > Targeting by attributes sent from a client is advisory (spoofable): the client chooses what it sends.
 > Security-sensitive decisions belong to server keys.
 

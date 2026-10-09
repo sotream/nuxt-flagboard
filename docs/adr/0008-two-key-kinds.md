@@ -18,6 +18,8 @@ be copied out of a web page.
 - A flag is visible to client keys only when `client_visible` is true (default false). For a client key a flag
   that is not visible behaves exactly like an unknown flag: `FLAG_NOT_FOUND`, with no way to tell the two apart.
 - Both kinds belong to one environment.
+- `POST /v1/evaluate` answers CORS requests from any origin (`Access-Control-Allow-Origin: *`, no credentials), so a
+  client key works from a browser on another origin. `/v1/snapshot` and the admin API send no CORS headers.
 - **Targeting by client-supplied attributes is advisory (spoofable).** A client chooses the attributes it sends, so
   any rule that depends on them can be bypassed by a user who edits their own requests. Security-sensitive
   decisions belong to server keys, where the application supplies trusted attributes.
