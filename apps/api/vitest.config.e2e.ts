@@ -22,6 +22,7 @@ export default defineConfig({
     env: {
       APP_ENV: 'dev',
       LOG_LEVEL: 'silent',
+      JWT_ACCESS_SECRET: 'e2e-only-signing-key-0123456789-abcdefghijklmnop',
       DATABASE_URL: toTestDatabaseUrl(DATABASE_URL),
       MIGRATOR_DATABASE_URL: toTestDatabaseUrl(MIGRATOR_DATABASE_URL),
     },
