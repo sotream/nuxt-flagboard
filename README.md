@@ -6,9 +6,19 @@ and SDK that applications call to ask "is this flag on for this user?".
 It is a portfolio project. It is built to be read and explained, not to be deployed as it is; see
 [Known limitations](#known-limitations).
 
-<!-- Screenshots: owner to add (flag list, flag page with rules and rollout, audit log, live indicator). -->
+## Screenshots
 
-> **Screenshots:** to be added by the repository owner.
+Taken from the seeded demo data (`pnpm db:seed`), so they show what you get after the quick start.
+
+![A flag with environment tabs, an enabled switch, a 25% rollout and targeting rules](docs/images/flag-detail.png)
+
+| Dark theme                                                           | Kill switch on                                                 |
+| -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| ![The flag page in the dark theme](docs/images/flag-detail-dark.png) | ![A flag with the kill switch on](docs/images/kill-switch.png) |
+
+![The flag list of a project](docs/images/flag-list.png)
+
+![The audit log: who changed what, with before and after values](docs/images/audit-log.png)
 
 ## The problem
 
