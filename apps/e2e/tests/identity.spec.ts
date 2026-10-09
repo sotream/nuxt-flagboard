@@ -108,10 +108,12 @@ async function signIn(page: Page): Promise<void> {
 
 /** Enters a theme through the real toggle, which cycles system, light and dark. */
 async function setTheme(page: Page, theme: Theme): Promise<void> {
-  const toggle = page.getByRole('button', { name: /^Theme:/ });
+  // The accessible name starts with the text on the button: "Auto theme, ...", "Light theme. ...", "Dark theme. ...".
+  const toggle = page.getByRole('button', { name: /^(Auto|Light|Dark) theme/ });
+  const wanted = `${theme === 'light' ? 'Light' : 'Dark'} theme`;
   for (let attempt = 0; attempt < 3; attempt++) {
     const label = (await toggle.getAttribute('aria-label')) ?? '';
-    if (label.startsWith(`Theme: ${theme}`)) {
+    if (label.startsWith(wanted)) {
       if (theme === 'dark') await expect(page.locator('html')).toHaveClass(/dark/);
       else await expect(page.locator('html')).not.toHaveClass(/dark/);
       return;

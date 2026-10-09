@@ -163,13 +163,26 @@ export interface DayGroup {
   events: AuditEventView[];
 }
 
-const dayKey = (date: Date, timeZone: string): string =>
-  new Intl.DateTimeFormat('en-CA', {
+interface CalendarDate {
+  year: number;
+  month: number;
+  day: number;
+}
+
+/** The calendar date in `timeZone`, taken from the parts of the date, never from formatted text. */
+function calendarDate(date: Date, timeZone: string): CalendarDate {
+  const parts = new Intl.DateTimeFormat('en-US', {
     timeZone,
     year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date);
+    month: 'numeric',
+    day: 'numeric',
+  }).formatToParts(date);
+  const part = (type: string): number => Number(parts.find((p) => p.type === type)?.value);
+  return { year: part('year'), month: part('month'), day: part('day') };
+}
+
+const keyOf = ({ year, month, day }: CalendarDate): string =>
+  `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
 /** "Wednesday 7 October", with the year when it is not the current one. Built from parts: no locale punctuation. */
 function longLabel(date: Date, timeZone: string, withYear: boolean): string {
@@ -208,14 +221,19 @@ function labelFor(date: Date, key: string, days: Days): string {
  * `now` is passed in, never read from the clock here, so the result is the same on every machine.
  */
 export function groupByDay(events: AuditEventView[], now: Date, timeZone: string): DayGroup[] {
-  const today = dayKey(now, timeZone);
-  const [year, month, day] = today.split('-').map(Number) as [number, number, number];
-  const yesterday = new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10);
+  const todayDate = calendarDate(now, timeZone);
+  const today = keyOf(todayDate);
+  const before = new Date(Date.UTC(todayDate.year, todayDate.month - 1, todayDate.day - 1));
+  const yesterday = keyOf({
+    year: before.getUTCFullYear(),
+    month: before.getUTCMonth() + 1,
+    day: before.getUTCDate(),
+  });
   const days: Days = { today, yesterday, timeZone };
   const groups = new Map<string, DayGroup>();
   for (const event of events) {
     const date = new Date(event.createdAt);
-    const key = Number.isNaN(date.getTime()) ? 'unknown' : dayKey(date, timeZone);
+    const key = Number.isNaN(date.getTime()) ? 'unknown' : keyOf(calendarDate(date, timeZone));
     const group = groups.get(key) ?? { key, label: labelFor(date, key, days), events: [] };
     group.events.push(event);
     groups.set(key, group);

@@ -4,10 +4,16 @@ import { useColorMode } from '~/composables/useColorMode';
 
 const { preference, theme, cycle } = useColorMode();
 
-const label = computed(() => {
-  const names = { system: 'system', light: 'light', dark: 'dark' } as const;
-  return `Theme: ${names[preference.value]}${preference.value === 'system' ? ` (${theme.value})` : ''}. Press to change.`;
-});
+// The text on the button and the start of its accessible name come from one place, so they cannot drift apart
+// (WCAG 2.5.3, label in name: a person who says "Auto" to a voice control must hit this button).
+const visibleText = computed(
+  () => ({ system: 'Auto', light: 'Light', dark: 'Dark' })[preference.value],
+);
+const label = computed(() =>
+  preference.value === 'system'
+    ? `${visibleText.value} theme, following the system (currently ${theme.value}). Press to change.`
+    : `${visibleText.value} theme. Press to change.`,
+);
 </script>
 
 <template>
@@ -18,8 +24,6 @@ const label = computed(() => {
     @click="cycle"
   >
     <AppIcon :name="theme === 'dark' ? 'moon' : 'sun'" />
-    <span aria-hidden="true">{{
-      preference === 'system' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark'
-    }}</span>
+    <span>{{ visibleText }}</span>
   </button>
 </template>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AuditEventView } from '../../app/utils/api-types';
 import { describeEvent, groupByDay } from '../../app/utils/audit-sentence';
 
@@ -220,6 +220,23 @@ describe('groupByDay', () => {
     const now = new Date('2026-03-29T22:30:00Z'); // 00:30 on 30 March in Berlin; 24 hours earlier is still 28 March
     const groups = groupByDay([at('2026-03-29T10:00:00Z')], now, 'Europe/Berlin');
     expect(labels(groups)).toEqual(['Yesterday']);
+  });
+
+  describe('when a locale writes dates differently', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('does not read the day from formatted text (a locale may write 10/09/2026 or 09.10.2026)', () => {
+      // Whatever `format()` returns, the day must come from the parts of the date, not from a string to be split.
+      // `format` is a getter that returns the formatting function.
+      vi.spyOn(Intl.DateTimeFormat.prototype, 'format', 'get').mockReturnValue(() => '10/09/2026');
+      const now = new Date('2026-10-09T10:00:00Z');
+      const groups = groupByDay(
+        [at('2026-10-09T09:00:00Z'), at('2026-10-08T09:00:00Z'), at('2026-10-07T12:00:00Z')],
+        now,
+        'UTC',
+      );
+      expect(labels(groups)).toEqual(['Today', 'Yesterday', 'Wednesday 7 October']);
+    });
   });
 
   it('puts an invalid timestamp in its own group instead of throwing', () => {

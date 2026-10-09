@@ -81,6 +81,23 @@ describe('audit page', () => {
     expect(wrapper.text()).toContain('cannot be edited or deleted');
   });
 
+  it('moves "Today" on when the page stays open past midnight', async () => {
+    // This test also fakes the timers, because the page waits for midnight with one timer.
+    vi.useFakeTimers({ toFake: ['Date', 'setTimeout', 'clearTimeout'] });
+    vi.setSystemTime(new Date('2026-10-09T10:01:00.000Z'));
+    serve([{ items: [event('1')], nextCursor: null }]);
+    const wrapper = await mountPage();
+    await flushPromises();
+    expect(wrapper.findAll('h3').map((h) => h.text())).toEqual(['Today']);
+
+    // 26 hours later it is certainly a later day in any time zone (the event is at 10:00 UTC).
+    await vi.advanceTimersByTimeAsync(26 * 3_600_000);
+    await flushPromises();
+
+    expect(wrapper.findAll('h3').map((h) => h.text())).not.toContain('Today');
+    wrapper.unmount();
+  });
+
   it('shows an event with an invalid timestamp under "Unknown date" instead of failing', async () => {
     serve([{ items: [event('1', { createdAt: 'not-a-date' }), event('2')], nextCursor: null }]);
     const wrapper = await mountPage();

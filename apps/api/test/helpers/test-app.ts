@@ -45,8 +45,10 @@ export async function createTestApp(
   const app = moduleRef.createNestApplication();
   configureApp(app);
   options.configure?.(app);
-  // Listen once so supertest reuses the server instead of opening and closing one per request.
-  await app.listen(0);
+  // Listen once so supertest reuses the server instead of opening and closing one per request. Only on the loopback
+  // address the requests use: on the wildcard address another program that listens on 127.0.0.1 with the same random
+  // port would answer them instead of the app (see test/loopback-port.e2e-spec.ts).
+  await app.listen(0, '127.0.0.1');
   const { port } = app.getHttpServer().address() as AddressInfo;
   return {
     app,

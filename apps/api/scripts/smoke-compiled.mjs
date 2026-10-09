@@ -10,8 +10,10 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 if (existsSync(path.join(root, '.env'))) process.loadEnvFile(path.join(root, '.env'));
 
+// A free port, found on the address the checks below use: on the wildcard address the kernel can hand out a port that
+// another program already uses on 127.0.0.1, and that program would answer the checks instead of the server.
 const port = await new Promise((resolve) => {
-  const probe = createServer().listen(0, () => {
+  const probe = createServer().listen(0, '127.0.0.1', () => {
     const { port } = probe.address();
     probe.close(() => resolve(port));
   });

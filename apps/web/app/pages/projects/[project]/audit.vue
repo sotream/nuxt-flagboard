@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useRoute } from '#imports';
+import { useNow } from '~/composables/useNow';
 import { useResource } from '~/composables/useResource';
 import { useSession } from '~/composables/useSession';
 import { ApiError } from '~/utils/api-error';
@@ -42,10 +43,12 @@ watch(
 watch(flagFilter, () => void first.reload());
 
 const events = computed(() => [...(first.data.value?.items ?? []), ...more.value]);
-// The viewer's own time zone decides where one day ends and the next begins.
+// The viewer's own time zone decides where one day ends and the next begins; `now` moves on at midnight, so
+// "Today" is right on a page that stays open.
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const now = useNow(timeZone);
 const groups = computed(() =>
-  groupByDay(events.value, new Date(), timeZone).map((group) => ({
+  groupByDay(events.value, now.value, timeZone).map((group) => ({
     ...group,
     items: group.events.map((event) => ({ event, description: describeEvent(event) })),
   })),

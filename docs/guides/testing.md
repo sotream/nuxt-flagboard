@@ -24,6 +24,15 @@
   Global setup rebuilds that database, so it first takes a PostgreSQL advisory lock and holds it for the whole run: a
   second `pnpm test:e2e` on the same machine waits for the first instead of dropping its tables mid-test. This
   replaced an occasional failure (`snapshot.e2e-spec.ts`, other files skipped) when two runs overlapped.
+  The tests reach the app on `127.0.0.1`, so the app listens on `127.0.0.1` and nowhere else
+  (`test/loopback-port.e2e-spec.ts` checks it). This fixed a rare failure of a whole file in `beforeAll`, such as
+  `POST /api/v1/auth/login: expected 200, got 503`, a status the API does not send. Cause: with the wildcard address,
+  macOS lets the app share a random port with another program that already listens on `127.0.0.1` (desktop tools do:
+  an agent hub, a notes app), and then **that program answers the tests**. If a run ever fails like this again, find
+  the answerer with `lsof -nP -iTCP:<port> -sTCP:LISTEN` while the suite runs, or read the `Server` header of the
+  failing response; do not add a retry, it would hide a collision instead of preventing it.
+  A laptop that goes to sleep in the middle of a run (lid closed on battery) fails whichever hook is running with
+  `Hook timed out in 10000ms` and a doubled run time; `pmset -g log | grep -E "Sleep|Wake"` shows it. Run again.
 - **`apps/web` unit and component** (`test/unit`, `test/nuxt`): pure helpers in plain Vitest, components and pages
   with Vitest and `@nuxt/test-utils`. The session and the event stream are replaced by fakes there.
 - **`apps/e2e`**: two Playwright files, few tests, on purpose. `flag-lifecycle.spec.ts` signs in, creates a flag in the

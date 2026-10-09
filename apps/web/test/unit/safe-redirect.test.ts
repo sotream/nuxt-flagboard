@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { safeRedirect } from '../../app/utils/safe-redirect';
+import { isLoginPath, safeRedirect } from '../../app/utils/safe-redirect';
 
 describe('safeRedirect', () => {
   it.each([
@@ -24,4 +24,34 @@ describe('safeRedirect', () => {
   ])('falls back to the home page for %s', (_label, value) => {
     expect(safeRedirect(value)).toBe('/');
   });
+});
+
+describe('isLoginPath', () => {
+  it.each([
+    '/login',
+    '/login/',
+    '/login//',
+    '/login?redirect=/x',
+    '/login/?a=1',
+    '/login#top',
+    '/login/#top',
+  ])('recognises %s as the sign-in page', (path) => {
+    expect(isLoginPath(path)).toBe(true);
+  });
+
+  it.each(['/', '/loginx', '/login/extra', '/projects/login', '/log-in', '', '/Login'])(
+    'does not mistake %s for the sign-in page',
+    (path) => {
+      expect(isLoginPath(path)).toBe(false);
+    },
+  );
+});
+
+describe('safeRedirect and the sign-in page', () => {
+  it.each(['/login', '/login/', '/login?redirect=/projects', '/login/#x'])(
+    'never sends a signed-in user back to %s',
+    (path) => {
+      expect(safeRedirect(path)).toBe('/');
+    },
+  );
 });

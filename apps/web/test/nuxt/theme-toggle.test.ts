@@ -21,12 +21,26 @@ describe('ThemeToggle', () => {
   it('describes the current theme for screen readers and cycles on press', async () => {
     const wrapper = await mountSuspended(ThemeToggle);
     const button = wrapper.get('button');
-    expect(button.attributes('aria-label')).toContain('Theme: system');
+    expect(button.attributes('aria-label')).toContain(
+      'Auto theme, following the system (currently light)',
+    );
 
     await button.trigger('click');
-    expect(button.attributes('aria-label')).toContain('Theme: light');
+    expect(button.attributes('aria-label')).toContain('Light theme');
     await button.trigger('click');
-    expect(button.attributes('aria-label')).toContain('Theme: dark');
+    expect(button.attributes('aria-label')).toContain('Dark theme');
+  });
+
+  it('has an accessible name that starts with the text on the button (WCAG 2.5.3, label in name)', async () => {
+    const wrapper = await mountSuspended(ThemeToggle);
+    const button = wrapper.get('button');
+
+    for (const visible of ['Auto', 'Light', 'Dark']) {
+      expect(button.text()).toBe(visible);
+      expect(button.attributes('aria-label')?.startsWith(visible)).toBe(true);
+      expect(button.attributes('aria-label')).toMatch(/Press to change/); // still says what the button does
+      await button.trigger('click');
+    }
   });
 
   it('puts the dark class on <html> and saves the choice', async () => {
