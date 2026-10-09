@@ -25,7 +25,7 @@ flowchart LR
     UI[Nuxt admin UI<br/>static SPA]
   end
   subgraph Apps[Your applications]
-    SDK[@flagboard/sdk]
+    SDK["@flagboard/sdk"]
   end
   UI -- "/api/v1/* (cookie session, SSE)" --> API
   SDK -- "/v1/* (API key)" --> API
