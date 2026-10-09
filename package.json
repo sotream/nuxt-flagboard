@@ -16,7 +16,13 @@
     "test:e2e": "turbo run test:e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "infra:reset": "docker compose down -v && docker compose up -d --wait",
+    "db:migrate": "pnpm --filter api db:migrate",
+    "db:migrate:revert": "pnpm --filter api db:migrate:revert",
+    "db:migrate:generate": "pnpm --filter api db:migrate:generate"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

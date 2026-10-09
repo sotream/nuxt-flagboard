@@ -1,0 +1,29 @@
+# Local infra only: the apps run on the host. Copy .env.example to .env first; compose refuses to start
+# without the passwords. Init scripts run only on a fresh volume, so after changing infra/postgres run
+# `pnpm infra:reset`.
+name: nuxt-flagboard
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?copy .env.example to .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?copy .env.example to .env}
+      POSTGRES_DB: ${POSTGRES_DB:?copy .env.example to .env}
+      FLAGBOARD_MIGRATOR_PASSWORD: ${FLAGBOARD_MIGRATOR_PASSWORD:?copy .env.example to .env}
+      FLAGBOARD_APP_PASSWORD: ${FLAGBOARD_APP_PASSWORD:?copy .env.example to .env}
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5434}:5432'
+    volumes:
+      # Postgres 18+ keeps the version-specific data directory under /var/lib/postgresql
+      - postgres-data:/var/lib/postgresql
+      - ./infra/postgres/init-roles.sh:/docker-entrypoint-initdb.d/10-init-roles.sh:ro
+      - ./infra/postgres/init-roles.sql:/opt/flagboard/init-roles.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres-data:
