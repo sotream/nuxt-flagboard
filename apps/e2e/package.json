@@ -1,0 +1,19 @@
+{
+  "name": "e2e",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test:browser": "playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^24.19.1",
+    "eslint": "^10.12.0",
+    "typescript": "~6.0.3"
+  }
+}
