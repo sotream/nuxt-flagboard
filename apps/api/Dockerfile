@@ -2,7 +2,7 @@
 # The image holds the compiled API only. It carries no migration tooling: schema changes run with the migrator
 # role (`pnpm db:migrate`), never from the running container, which only has the data-access role.
 
-FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS build
+FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS build
 RUN corepack enable
 WORKDIR /repo
 
@@ -19,7 +19,7 @@ RUN pnpm --filter @flagboard/core build && pnpm --filter api build
 # Only what the running API needs: compiled code and production dependencies.
 RUN pnpm --filter api deploy --prod --legacy /out
 
-FROM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1
+FROM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
