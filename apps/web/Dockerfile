@@ -18,7 +18,7 @@ RUN pnpm --filter @flagboard/core build && pnpm --filter web build
 # Fill the Content-Security-Policy with the hashes of the inline scripts Nuxt just generated.
 RUN node apps/web/docker/render-nginx-conf.ts apps/web/.output/public apps/web/docker/default.conf.template /default.conf.template
 
-FROM nginxinc/nginx-unprivileged:1.30-alpine@sha256:15c994d10d6d78658721c3bcafff14cb281fba2a4bdf9d5ba92c416a472516e3
+FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:b9241c6e7b8e9a862f129d8d4199ab64b10390949a78bdd5603379b32c844083
 ENV API_UPSTREAM=http://api:4010
 COPY --from=build /default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /repo/apps/web/.output/public /usr/share/nginx/html
