@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import { coreAlias } from './vitest.alias.js';
 import { loadRootEnv } from './src/infrastructure/config/load-env.js';
 import { toTestDatabaseUrl } from './test/helpers/test-database-url.js';
 
@@ -12,6 +13,7 @@ if (!DATABASE_URL || !MIGRATOR_DATABASE_URL) {
 }
 
 export default defineConfig({
+  resolve: { alias: coreAlias },
   test: {
     globals: true,
     include: ['test/**/*.e2e-spec.ts'],
