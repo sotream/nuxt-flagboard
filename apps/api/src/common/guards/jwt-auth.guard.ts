@@ -10,6 +10,7 @@ interface AccessTokenPayload {
   sub: string;
   email: string;
   role: Role;
+  exp: number;
 }
 
 const isRole = (value: unknown): value is Role => value === Role.Admin || value === Role.Viewer;
@@ -44,10 +45,19 @@ export class JwtAuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException('Invalid or expired access token');
     }
-    if (!isRole(payload.role) || typeof payload.sub !== 'string') {
+    if (
+      !isRole(payload.role) ||
+      typeof payload.sub !== 'string' ||
+      typeof payload.exp !== 'number'
+    ) {
       throw new UnauthorizedException('Invalid access token');
     }
-    request.user = { id: payload.sub, email: payload.email, role: payload.role };
+    request.user = {
+      id: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      expiresAt: payload.exp * 1000,
+    };
     return true;
   }
 

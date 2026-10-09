@@ -14,7 +14,9 @@
     "db:migrate": "nest build && typeorm migration:run -d dist/infrastructure/database/data-source.js",
     "db:migrate:revert": "nest build && typeorm migration:revert -d dist/infrastructure/database/data-source.js",
     "db:migrate:generate": "nest build && typeorm migration:generate -d dist/infrastructure/database/data-source.js",
-    "test:e2e": "vitest run --config vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config vitest.config.e2e.ts",
+    "db:seed": "nest build && node dist/infrastructure/database/seeds/run-seed.js",
+    "smoke": "nest build && node scripts/smoke-compiled.mjs"
   },
   "dependencies": {
     "@flagboard/core": "workspace:*",
@@ -22,6 +24,7 @@
     "@nestjs/core": "^12.1.2",
     "@nestjs/jwt": "^12.0.2",
     "@nestjs/platform-express": "^12.1.2",
+    "@nestjs/swagger": "^12.0.2",
     "@nestjs/throttler": "^6.7.1",
     "@nestjs/typeorm": "^12.0.2",
     "bcryptjs": "^3.0.3",

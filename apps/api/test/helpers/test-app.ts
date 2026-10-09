@@ -23,7 +23,12 @@ export interface TestApp {
  * applied before the app reads its configuration and undone on `close`. `controllers` adds test-only routes.
  */
 export async function createTestApp(
-  options: { env?: Record<string, string>; controllers?: Type[] } = {},
+  options: {
+    env?: Record<string, string>;
+    controllers?: Type[];
+    /** Runs on the app before it starts listening, for setup that must happen before init (Swagger). */
+    configure?: (app: INestApplication) => void;
+  } = {},
 ): Promise<TestApp> {
   const previous = new Map<string, string | undefined>();
   for (const [key, value] of Object.entries({ WEB_ORIGIN, ...options.env })) {
@@ -36,6 +41,7 @@ export async function createTestApp(
   }).compile();
   const app = moduleRef.createNestApplication();
   configureApp(app);
+  options.configure?.(app);
   // Listen once so supertest reuses the server instead of opening and closing one per request.
   await app.listen(0);
   return {

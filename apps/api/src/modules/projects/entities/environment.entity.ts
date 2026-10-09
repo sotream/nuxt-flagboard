@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Project } from './project.entity.js';
 
 export const ENVIRONMENT_KEYS = ['dev', 'staging', 'prod'] as const;
@@ -17,5 +18,6 @@ export class Environment {
 
   @ManyToOne(() => Project, (project) => project.environments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'project_id' })
-  project!: Project;
+  /** `Relation<>` keeps the emitted metadata from referring to `Project` while its module is still loading (ESM cycle). */
+  project!: Relation<Project>;
 }

@@ -22,7 +22,8 @@
     "infra:reset": "docker compose down -v && docker compose up -d --wait",
     "db:migrate": "pnpm --filter api db:migrate",
     "db:migrate:revert": "pnpm --filter api db:migrate:revert",
-    "db:migrate:generate": "pnpm --filter api db:migrate:generate"
+    "db:migrate:generate": "pnpm --filter api db:migrate:generate",
+    "db:seed": "pnpm --filter api db:seed"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",

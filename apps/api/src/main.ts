@@ -5,6 +5,7 @@ import { AppModule } from './app.module.js';
 import { EnvironmentVariables } from './infrastructure/config/env.validation.js';
 import { loadRootEnv } from './infrastructure/config/load-env.js';
 import { configureApp } from './setup-app.js';
+import { setupSwagger } from './setup-swagger.js';
 
 async function bootstrap(): Promise<void> {
   loadRootEnv();
@@ -13,6 +14,7 @@ async function bootstrap(): Promise<void> {
   app.enableShutdownHooks();
   configureApp(app);
   const env = app.get(EnvironmentVariables);
+  setupSwagger(app, env.APP_ENV);
   if (env.TRUST_PROXY_HOPS > 0) {
     // Only behind that many reverse proxies, so clients cannot spoof their IP with X-Forwarded-For.
     app.set('trust proxy', env.TRUST_PROXY_HOPS);

@@ -1,4 +1,5 @@
 import type { AttributeValue } from '@flagboard/core';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
@@ -51,23 +52,38 @@ function IsAttributes(options?: ValidationOptions) {
 }
 
 export class EvaluationContextDto {
+  @ApiPropertyOptional({
+    description: `Stable id of the user. Needed for percentage rollouts. Up to ${MAX_USER_ID_LENGTH} characters.`,
+    example: 'user-42',
+  })
   @IsOptional()
   @IsString()
   @MaxLength(MAX_USER_ID_LENGTH)
   userId?: string;
 
+  @ApiPropertyOptional({
+    description: `Attributes that targeting rules can match: at most ${MAX_ATTRIBUTES}, string, number or boolean values. Attributes sent by a client key are advisory: the client chooses them.`,
+    example: { country: 'UA', plan: 'pro' },
+    type: 'object',
+    additionalProperties: true,
+  })
   @IsOptional()
   @IsAttributes()
   attributes?: Record<string, AttributeValue>;
 }
 
 export class EvaluateDto {
+  @ApiPropertyOptional({ type: () => EvaluationContextDto })
   @IsOptional()
   @ValidateNested()
   @Type(() => EvaluationContextDto)
   context?: EvaluationContextDto;
 
-  /** Flag keys to evaluate. Omit it to evaluate every flag the key may see. */
+  @ApiPropertyOptional({
+    description: `Flag keys to evaluate (at most ${MAX_FLAGS_PER_REQUEST}). Omit it to evaluate every flag the key may see.`,
+    type: [String],
+    example: ['new-checkout'],
+  })
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(MAX_FLAGS_PER_REQUEST)

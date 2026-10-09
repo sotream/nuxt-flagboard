@@ -5,4 +5,6 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   role: Role;
+  /** When the access token expires, in milliseconds since the epoch. Long-lived streams end then. */
+  expiresAt: number;
 }

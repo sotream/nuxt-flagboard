@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { RetryAfterThrottlerGuard } from './infrastructure/rate-limit/retry-after-throttler.guard.js';
 import { ClientErrorFilter } from './common/filters/client-error.filter.js';
+import { HealthModule } from './modules/health/health.module.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { RolesGuard } from './common/guards/roles.guard.js';
 import { ConfigModule } from './infrastructure/config/config.module.js';
@@ -12,6 +13,7 @@ import { ApiKeysModule } from './modules/api-keys/api-keys.module.js';
 import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { EvaluationModule } from './modules/evaluation/evaluation.module.js';
+import { EventsModule } from './modules/events/events.module.js';
 import { FlagsModule } from './modules/flags/flags.module.js';
 import { ProjectsModule } from './modules/projects/projects.module.js';
 import { UsersModule } from './modules/users/users.module.js';
@@ -29,6 +31,8 @@ import { UsersModule } from './modules/users/users.module.js';
     FlagsModule,
     ApiKeysModule,
     EvaluationModule,
+    EventsModule,
+    HealthModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: ClientErrorFilter },

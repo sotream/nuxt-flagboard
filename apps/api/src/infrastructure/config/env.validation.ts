@@ -120,6 +120,22 @@ export class EnvironmentVariables {
   @Min(0)
   @Max(10)
   TRUST_PROXY_HOPS = 0;
+
+  /** Live-update streams a user may keep open at once. A new one beyond this closes the oldest. */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  SSE_MAX_STREAMS_PER_USER = 5;
+
+  /** How often an idle stream sends a heartbeat, so proxies do not close it as idle. */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(300)
+  SSE_HEARTBEAT_SECONDS = 25;
 }
 
 /** Reasons the environment is not safe for `APP_ENV=prod`. Never includes the offending values. */

@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import type { Relation } from 'typeorm';
 import type { Rule } from '@flagboard/core';
 import { Environment } from '../../projects/entities/environment.entity.js';
 import { Flag } from './flag.entity.js';
@@ -38,9 +39,10 @@ export class FlagEnvironment {
 
   @ManyToOne(() => Flag, (flag) => flag.flagEnvironments, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'flag_id' })
-  flag!: Flag;
+  /** `Relation<>` keeps the emitted metadata from referring to `Flag` while its module is still loading (ESM cycle). */
+  flag!: Relation<Flag>;
 
   @ManyToOne(() => Environment, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'environment_id' })
-  environment!: Environment;
+  environment!: Relation<Environment>;
 }

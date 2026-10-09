@@ -6,6 +6,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { Environment } from '../../projects/entities/environment.entity.js';
 import type { ApiKeyKind } from '../api-key.js';
 
@@ -41,5 +42,5 @@ export class ApiKey {
 
   @ManyToOne(() => Environment, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'environment_id' })
-  environment!: Environment;
+  environment!: Relation<Environment>;
 }

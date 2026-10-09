@@ -4,4 +4,6 @@ packages:
 
 # Install scripts are skipped unless a package is listed here. New packages with build scripts fail install
 # until reviewed.
-allowBuilds: {}
+allowBuilds:
+  # Analytics for swagger-ui-dist only; its install script is not needed and not wanted.
+  '@scarf/scarf': false
