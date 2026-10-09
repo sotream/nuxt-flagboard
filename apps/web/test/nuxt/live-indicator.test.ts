@@ -8,6 +8,7 @@ describe('LiveIndicator', () => {
     ['live', 'Live'],
     ['reconnecting', 'Reconnecting…'],
     ['offline', 'Live updates unavailable'],
+    ['evicted', 'Live updates paused: too many tabs'],
   ] as const)('says %s in words, not only in colour', async (status, text) => {
     const wrapper = await mountSuspended(LiveIndicator, { props: { status } });
     expect(wrapper.text()).toContain(text);

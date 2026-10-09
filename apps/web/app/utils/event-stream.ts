@@ -2,7 +2,7 @@ import { ApiError } from './api-error';
 import { parseSse } from './sse';
 import type { SseMessage } from './sse';
 
-export type StreamStatus = 'connecting' | 'live' | 'reconnecting' | 'offline';
+export type StreamStatus = 'connecting' | 'live' | 'reconnecting' | 'offline' | 'evicted';
 
 export interface EventStreamOptions {
   /** Opens the stream. Called again for every reconnect. */
@@ -38,9 +38,9 @@ const isFatal = (problem: unknown): boolean =>
 
 /**
  * Keeps one stream open until `signal` aborts. When the stream ends (the server closes it when the access token
- * expires, when the user opens too many, or on a restart) or fails, it waits and opens it again, doubling the wait
- * up to 30 seconds so a struggling server is not hammered. A repeated eviction from too many open tabs therefore
- * slows down instead of spinning.
+ * expires or on a restart) or fails, it waits and opens it again, doubling the wait
+ * up to 30 seconds so a struggling server is not hammered. An `evicted` event (the user opened too many tabs
+ * and this stream was the oldest) ends the loop for good; the indicator tells the user.
  */
 export async function runEventStream(options: EventStreamOptions): Promise<void> {
   const sleep = options.sleep ?? defaultSleep;
@@ -60,6 +60,11 @@ export async function runEventStream(options: EventStreamOptions): Promise<void>
       connectedBefore = true;
       options.onStatus('live');
       for await (const message of parseSse(response.body)) {
+        if (message.type === 'evicted') {
+          // The server closed this stream to make room for a newer tab. Reconnecting would evict another tab.
+          options.onStatus('evicted');
+          return false;
+        }
         options.onMessage(message);
       }
     } catch (problem) {

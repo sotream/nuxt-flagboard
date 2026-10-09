@@ -64,6 +64,18 @@ describe('runEventStream', () => {
     expect(reconnected).toHaveBeenCalledTimes(1); // only the second connection counts as a reconnect
   });
 
+  it('stops for good after an evicted event, so tabs do not take turns evicting each other', async () => {
+    const { statuses, calls, sleeps, reconnected } = await run([
+      sse('event: ready\ndata: {}', 'event: evicted\ndata: {}'),
+      sse('data: never opened'),
+    ]);
+
+    expect(calls).toBe(1);
+    expect(sleeps).toEqual([]);
+    expect(statuses.at(-1)).toBe('evicted');
+    expect(reconnected).not.toHaveBeenCalled();
+  });
+
   it('does not call onReconnected for the first connection', async () => {
     const { reconnected } = await run([sse('data: 1')]);
     expect(reconnected).not.toHaveBeenCalled();

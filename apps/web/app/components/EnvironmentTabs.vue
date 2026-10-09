@@ -61,7 +61,7 @@ function onKeydown(event: KeyboardEvent, index: number): void {
     >
       <span class="font-mono uppercase">{{ environment.key }}</span>
       <span class="sr-only">: </span>
-      <span class="ml-2 text-xs font-normal opacity-80">{{ environment.status }}</span>
+      <span class="ml-2 text-xs font-normal">{{ environment.status }}</span>
     </button>
   </div>
 </template>

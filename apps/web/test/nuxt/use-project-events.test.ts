@@ -91,6 +91,19 @@ describe('useProjectEvents', () => {
     wrapper.unmount();
   });
 
+  it('reports evicted and does not reconnect when the server evicts the stream', async () => {
+    const fetchStream = openStream('event: ready\ndata: {}', 'event: evicted\ndata: {}');
+    session.authorizedFetch.mockImplementation(fetchStream);
+    const { mount, reconnected } = mountWithEvents();
+    const wrapper = await mount();
+    await flushPromises();
+
+    expect(wrapper.get('[data-status]').attributes('data-status')).toBe('evicted');
+    expect(fetchStream).toHaveBeenCalledTimes(1);
+    expect(reconnected).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
+
   it('closes the stream when the component goes away', async () => {
     let signal: AbortSignal | undefined;
     session.authorizedFetch.mockImplementation(async (_path: string, init: RequestInit) => {

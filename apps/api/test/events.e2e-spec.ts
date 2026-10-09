@@ -160,6 +160,29 @@ describe('stream limit per user', () => {
     await third.waitFor((e) => e.type === 'ready');
   });
 
+  it('tells the evicted stream why it ends, so its client does not reconnect', async () => {
+    const first = await connect();
+    await connect();
+    await first.waitFor((e) => e.type === 'ready');
+
+    await connect();
+
+    await first.waitFor((e) => e.type === 'evicted');
+    expect(await first.endedWithin(2000)).toBe(true);
+  });
+
+  it('does not send evicted when a stream ends for another reason', async () => {
+    const shortLived = await new JwtService({ secret: process.env.JWT_ACCESS_SECRET }).signAsync(
+      { sub: s.admin.id, email: s.admin.email, role: Role.Admin },
+      { expiresIn: 1 },
+    );
+    const stream = await connect(shortLived);
+    await stream.waitFor((e) => e.type === 'ready');
+    await stream.endedWithin(3000);
+
+    expect(stream.events.some((e) => e.type === 'evicted')).toBe(false);
+  });
+
   it('counts each user separately', async () => {
     const viewer = await connect(s.viewerToken);
     await connect();

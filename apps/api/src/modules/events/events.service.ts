@@ -1,6 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import type { MessageEvent } from '@nestjs/common';
-import { filter, finalize, interval, map, merge, startWith, takeUntil, timer } from 'rxjs';
+import {
+  concatWith,
+  defer,
+  EMPTY,
+  filter,
+  finalize,
+  interval,
+  map,
+  merge,
+  of,
+  startWith,
+  takeUntil,
+  tap,
+  timer,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { AuthenticatedUser } from '../../common/interfaces/authenticated-user.interface.js';
 import { EnvironmentVariables } from '../../infrastructure/config/env.validation.js';
@@ -22,7 +36,7 @@ export class EventsService {
    * (the event only says what changed and its new revision, so the client re-reads the data) and `heartbeat`
    * while idle. Events of other projects never reach it: filtering happens here, on the server. The stream ends
    * when the access token expires (the client reconnects with a fresh one), when the user opens too many streams
-   * and this is the oldest, or on shutdown.
+   * and this is the oldest (it then gets one `evicted` event first), or on shutdown.
    */
   async open(projectKey: string, user: AuthenticatedUser): Promise<Observable<MessageEvent>> {
     const project = await this.projects.getByKey(projectKey);
@@ -45,9 +59,19 @@ export class EventsService {
       map((): MessageEvent => ({ type: 'heartbeat', data: {} })),
     );
 
+    // Only an eviction is announced: the client must not reconnect after it (it would evict another tab and the
+    // tabs would take turns). Token expiry and shutdown end silently, and the client reconnects as before.
+    let evicted = false;
+    const closed$ = registration.closed$.pipe(
+      tap((reason) => {
+        evicted = reason === 'evicted';
+      }),
+    );
+
     return merge(changes$, heartbeat$).pipe(
       startWith<MessageEvent>({ type: 'ready', data: {} }),
-      takeUntil(merge(registration.closed$, tokenExpired$)),
+      takeUntil(merge(closed$, tokenExpired$)),
+      concatWith(defer(() => (evicted ? of<MessageEvent>({ type: 'evicted', data: {} }) : EMPTY))),
       finalize(() => registration.release()),
     );
   }

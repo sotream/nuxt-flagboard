@@ -4,15 +4,18 @@ import { Subject } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { EnvironmentVariables } from '../../infrastructure/config/env.validation.js';
 
+/** Why the registry ends a stream. Eviction is the only one the client must be told about. */
+export type CloseReason = 'evicted' | 'shutdown';
+
 export interface StreamRegistration {
   /** Emits once when the stream must end: it was evicted by a newer one, or the server is shutting down. */
-  closed$: Observable<void>;
+  closed$: Observable<CloseReason>;
   /** Call when the stream ended for any reason. */
   release: () => void;
 }
 
 interface Entry {
-  close: () => void;
+  close: (reason: CloseReason) => void;
 }
 
 /**
@@ -27,11 +30,11 @@ export class StreamRegistry implements BeforeApplicationShutdown {
   constructor(private readonly env: EnvironmentVariables) {}
 
   register(userId: string): StreamRegistration {
-    const closed = new Subject<void>();
-    const entry: Entry = { close: () => closed.next() };
+    const closed = new Subject<CloseReason>();
+    const entry: Entry = { close: (reason) => closed.next(reason) };
     const mine = this.streams.get(userId) ?? [];
     while (mine.length >= this.env.SSE_MAX_STREAMS_PER_USER) {
-      mine.shift()?.close();
+      mine.shift()?.close('evicted');
     }
     mine.push(entry);
     this.streams.set(userId, mine);
@@ -56,7 +59,7 @@ export class StreamRegistry implements BeforeApplicationShutdown {
   /** Ends every open stream, so a shutdown does not wait for clients that never disconnect. */
   closeAll(): void {
     for (const entries of [...this.streams.values()]) {
-      for (const entry of [...entries]) entry.close();
+      for (const entry of [...entries]) entry.close('shutdown');
     }
   }
 

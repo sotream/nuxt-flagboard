@@ -121,7 +121,7 @@ const selectedEditor = computed(() => editors.value[selected.value]);
 
 <template>
   <section aria-labelledby="flag-title">
-    <nav aria-label="Breadcrumb" class="text-sm text-slate-600 dark:text-slate-400">
+    <nav aria-label="Flag breadcrumb" class="text-sm text-slate-600 dark:text-slate-400">
       <NuxtLink :to="`/projects/${projectKey}`" class="hover:underline">Flags</NuxtLink>
       <span aria-hidden="true"> / </span>
       <span>{{ flag.data.value?.name ?? route.params.flag }}</span>

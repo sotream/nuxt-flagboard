@@ -11,6 +11,7 @@ const text = computed(
       live: 'Live',
       reconnecting: 'Reconnecting…',
       offline: 'Live updates unavailable',
+      evicted: 'Live updates paused: too many tabs',
     })[props.status],
 );
 const dot = computed(
@@ -20,6 +21,7 @@ const dot = computed(
       live: 'bg-emerald-500',
       reconnecting: 'bg-amber-500',
       offline: 'bg-red-500',
+      evicted: 'bg-amber-500',
     })[props.status],
 );
 </script>

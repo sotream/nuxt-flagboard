@@ -22,7 +22,10 @@ browser. Browsers send changes with ordinary `PATCH` requests.
   in sync with the REST shapes. There is no `Last-Event-ID` replay; after a reconnect the client reloads.
 - Events are filtered by project **on the server**, so a client never receives another project's changes.
 - A user may hold at most 5 streams (`SSE_MAX_STREAMS_PER_USER`); opening a sixth closes the **oldest** rather than
-  refusing the new one, so a tab that lost its connection is never locked out by its own dead stream.
+  refusing the new one, so a tab that lost its connection is never locked out by its own dead stream. The evicted
+  stream first receives an `evicted` event. The client then does **not** reconnect (it would evict another tab,
+  and the tabs would take turns forever) and shows "Live updates paused: too many tabs". Token expiry and shutdown
+  send nothing and the client reconnects as usual.
 - A stream ends when the access token that opened it expires, so a revoked or expired session cannot keep reading
   changes. The client reconnects with a fresh token. Idle streams send a `heartbeat` every 25 seconds, and the
   response sets `X-Accel-Buffering: no` so reverse proxies do not hold events back.
