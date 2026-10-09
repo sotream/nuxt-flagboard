@@ -7,11 +7,22 @@ import { ConfigModule } from './infrastructure/config/config.module.js';
 import { DatabaseModule } from './infrastructure/database/database.module.js';
 import { LoggingModule } from './infrastructure/logging/logging.module.js';
 import { RateLimitModule } from './infrastructure/rate-limit/rate-limit.module.js';
+import { AuditModule } from './modules/audit/audit.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { ProjectsModule } from './modules/projects/projects.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
-  imports: [ConfigModule, LoggingModule, DatabaseModule, RateLimitModule, UsersModule, AuthModule],
+  imports: [
+    ConfigModule,
+    LoggingModule,
+    DatabaseModule,
+    RateLimitModule,
+    UsersModule,
+    AuthModule,
+    AuditModule,
+    ProjectsModule,
+  ],
   providers: [
     // Order matters: limit first (before any bcrypt work), then authenticate, then authorize.
     { provide: APP_GUARD, useClass: RetryAfterThrottlerGuard },
