@@ -12,6 +12,11 @@ Taken from the seeded demo data (`pnpm db:seed`), so they show what you get afte
 
 ![A flag with environment tabs, an enabled switch, a 25% rollout and targeting rules](docs/images/flag-detail.png)
 
+When two people edit the same environment, nothing is overwritten. The second person keeps their unsaved draft and
+chooses to load the latest state or apply their changes on top of it.
+
+![The conflict banner: a rollout edited by two people at once](docs/images/conflict-banner.png)
+
 | Dark theme                                                           | Kill switch on                                                 |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- |
 | ![The flag page in the dark theme](docs/images/flag-detail-dark.png) | ![A flag with the kill switch on](docs/images/kill-switch.png) |

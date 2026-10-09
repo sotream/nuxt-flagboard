@@ -13,6 +13,61 @@
   body {
     @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
   }
+  /*
+   * The rollout slider. The browser draws a light unfilled track in the dark theme whatever `accent-color` says,
+   * so the track and thumb are drawn here for both themes. `--fill` is the current value, set on the element.
+   */
+  .rollout-range {
+    --track: var(--color-slate-300);
+    appearance: none;
+    height: 1.25rem;
+    background: transparent;
+    cursor: pointer;
+  }
+  .dark .rollout-range {
+    --track: var(--color-slate-700);
+  }
+  .rollout-range:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  .rollout-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: linear-gradient(
+      to right,
+      var(--color-indigo-600) var(--fill),
+      var(--track) var(--fill)
+    );
+  }
+  .rollout-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: -0.375rem;
+    border-radius: 9999px;
+    border: 2px solid var(--color-white);
+    background: var(--color-indigo-600);
+    box-shadow: 0 0 0 1px var(--color-indigo-600);
+  }
+  .rollout-range::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--track);
+  }
+  .rollout-range::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-indigo-600);
+  }
+  .rollout-range::-moz-range-thumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    border: 2px solid var(--color-white);
+    background: var(--color-indigo-600);
+    box-shadow: 0 0 0 1px var(--color-indigo-600);
+  }
   /* One visible focus style for everything that can be focused with the keyboard. */
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-indigo-600 dark:outline-indigo-400;

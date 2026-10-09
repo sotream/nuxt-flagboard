@@ -68,7 +68,8 @@ function onCommit(): void {
         :aria-valuetext="`${modelValue} percent`"
         aria-label="Rollout percentage slider"
         :aria-describedby="hintId"
-        class="h-2 grow accent-indigo-600"
+        :style="{ '--fill': `${modelValue}%` }"
+        class="rollout-range grow"
         @input="onSlide"
       />
       <div class="flex items-center gap-1">
