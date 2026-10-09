@@ -93,6 +93,33 @@ export class EnvironmentVariables {
   @Min(1)
   @Max(100000)
   LOGIN_RATE_LIMIT_PER_MINUTE = 10;
+
+  /** Requests per minute per API key on `/v1/*`. */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(1000000)
+  API_KEY_RATE_LIMIT_PER_MINUTE = 600;
+
+  /** Failed key authentications per minute per client IP before further unknown keys get 429. */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100000)
+  KEY_AUTH_FAILURE_LIMIT_PER_MINUTE = 20;
+
+  /**
+   * Number of reverse proxies in front of the API whose `X-Forwarded-For` can be trusted. 0 (the default) means
+   * the socket address is the client, so behind a proxy every client shares one rate-limit bucket.
+   */
+  @Expose()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(10)
+  TRUST_PROXY_HOPS = 0;
 }
 
 /** Reasons the environment is not safe for `APP_ENV=prod`. Never includes the offending values. */

@@ -45,3 +45,18 @@ export async function startSession(env: Record<string, string> = {}): Promise<Ap
     },
   };
 }
+
+/** Creates an API key through the admin API and returns its plaintext (the only time it is available). */
+export async function createApiKey(
+  session: ApiSession,
+  projectKey: string,
+  kind: 'server' | 'client',
+  environment = 'dev',
+): Promise<{ key: string; id: string }> {
+  const response = await session.t.http
+    .post(`/api/v1/projects/${projectKey}/keys`)
+    .set(session.as(session.adminToken))
+    .send({ environment, kind, name: `${kind} key` })
+    .expect(201);
+  return { key: response.body.key, id: response.body.id };
+}
