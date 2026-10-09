@@ -15,3 +15,5 @@ paths:
   with the keyboard. No drag and drop as the only way to do something.
 - Viewers see controls disabled; the server is what enforces roles.
 - Rule and reason types come from `packages/core`; do not redefine them.
+- Colours, radii and type sizes come from the design tokens (`tokens.css`, mapped in `main.css`). No palette classes,
+  no `dark:` variants, no raw colours; icons come from `AppIcon`; fonts and assets are local files, never a CDN.

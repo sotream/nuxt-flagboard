@@ -55,7 +55,7 @@ function onCommit(): void {
 
 <template>
   <div class="space-y-2">
-    <label :for="`${id}-number`" class="block text-sm font-medium">Rollout percentage</label>
+    <label :for="`${id}-number`" class="block text-body font-medium">Rollout percentage</label>
     <div class="flex items-center gap-4">
       <input
         :id="`${id}-range`"
@@ -82,22 +82,17 @@ function onCommit(): void {
           :disabled="disabled"
           :aria-invalid="invalid ? 'true' : undefined"
           :aria-describedby="invalid ? `${id}-error` : hintId"
-          class="w-16 rounded-md border border-slate-300 bg-white px-2 py-1 text-right dark:border-slate-700 dark:bg-slate-950"
+          class="h-10 w-[4.5rem] rounded-sm border border-edge bg-surface px-2 text-right text-figure"
           @input="onType"
           @change="onCommit"
           @blur="onCommit"
         />
-        <span aria-hidden="true">%</span>
+        <span aria-hidden="true" class="text-section text-muted">%</span>
       </div>
     </div>
-    <p
-      v-if="invalid"
-      :id="`${id}-error`"
-      role="alert"
-      class="text-sm text-red-700 dark:text-red-300"
-    >
+    <p v-if="invalid" :id="`${id}-error`" role="alert" class="text-small text-danger font-medium">
       Enter a whole number from 0 to 100.
     </p>
-    <p :id="hintId" class="text-sm text-slate-600 dark:text-slate-400">{{ description }}</p>
+    <p :id="hintId" class="text-small text-muted">{{ description }}</p>
   </div>
 </template>

@@ -1,7 +1,55 @@
 @import 'tailwindcss';
+@import './fonts.css';
+@import './tokens.css';
 
-/* Dark mode follows a class on <html>, set by /theme-init.js and by the theme toggle. */
-@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  /* The default palette and the large radii are switched off: a utility that is not defined cannot be used by
+     accident, and a test rejects palette class names anyway (see test/unit/no-raw-colours.test.ts). */
+  --color-*: initial;
+  --radius-*: initial;
+  --font-sans: 'Geologica', 'Geologica Fallback', Arial, sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', 'Courier New', monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-full: 9999px;
+  --text-title: 1.375rem;
+  --text-title--line-height: 1.75rem;
+  --text-section: 1rem;
+  --text-section--line-height: 1.5rem;
+  --text-body: 0.8125rem;
+  --text-body--line-height: 1.25rem;
+  --text-small: 0.75rem;
+  --text-small--line-height: 1rem;
+  --text-figure: 1.75rem;
+  --text-figure--line-height: 1.75rem;
+}
+
+/* The colours come from tokens.css and flip with the theme, so components never need a `dark:` variant. */
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-subtle: var(--subtle);
+  --color-line: var(--line);
+  --color-edge: var(--edge);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-ink: var(--accent-ink);
+  --color-on: var(--on);
+  --color-on-subtle: var(--on-subtle);
+  --color-kill: var(--kill);
+  --color-kill-subtle: var(--kill-subtle);
+  --color-kill-fg: var(--kill-fg);
+  --color-warn: var(--warn);
+  --color-warn-subtle: var(--warn-subtle);
+  --color-danger: var(--kill);
+  --color-live: var(--on);
+  --color-transparent: transparent;
+  --color-current: currentColor;
+}
 
 @layer base {
   html {
@@ -11,65 +59,114 @@
     color-scheme: dark;
   }
   body {
-    @apply bg-slate-50 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-page font-sans text-body text-ink antialiased;
+    font-weight: 420;
+  }
+  /* Large type only: the sharpness axis stays off below 20 px, where plain shapes read better. */
+  .text-title,
+  .text-figure {
+    font-weight: 600;
+    font-variation-settings: 'SHRP' 100;
+  }
+  .text-title {
+    letter-spacing: -0.015em;
+  }
+  .text-figure {
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono);
+  }
+  /* One visible focus style for everything that can be focused with the keyboard. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   /*
    * The rollout slider. The browser draws a light unfilled track in the dark theme whatever `accent-color` says,
-   * so the track and thumb are drawn here for both themes. `--fill` is the current value, set on the element.
+   * so the track and thumb are drawn here, from the tokens, for both themes. `--fill` is the current value,
+   * set on the element.
    */
   .rollout-range {
-    --track: var(--color-slate-300);
     appearance: none;
     height: 1.25rem;
     background: transparent;
     cursor: pointer;
-  }
-  .dark .rollout-range {
-    --track: var(--color-slate-700);
   }
   .rollout-range:disabled {
     cursor: not-allowed;
     opacity: 0.5;
   }
   .rollout-range::-webkit-slider-runnable-track {
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: linear-gradient(
-      to right,
-      var(--color-indigo-600) var(--fill),
-      var(--track) var(--fill)
-    );
+    height: 0.375rem;
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 0 0 1px var(--line);
+    background: linear-gradient(to right, var(--accent) var(--fill), var(--subtle) var(--fill));
   }
   .rollout-range::-webkit-slider-thumb {
     appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
-    margin-top: -0.375rem;
-    border-radius: 9999px;
-    border: 2px solid var(--color-white);
-    background: var(--color-indigo-600);
-    box-shadow: 0 0 0 1px var(--color-indigo-600);
-  }
-  .rollout-range::-moz-range-track {
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: var(--track);
-  }
-  .rollout-range::-moz-range-progress {
-    height: 0.5rem;
-    border-radius: 9999px;
-    background: var(--color-indigo-600);
-  }
-  .rollout-range::-moz-range-thumb {
     width: 1rem;
     height: 1rem;
-    border-radius: 9999px;
-    border: 2px solid var(--color-white);
-    background: var(--color-indigo-600);
-    box-shadow: 0 0 0 1px var(--color-indigo-600);
+    margin-top: -0.3125rem;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--accent);
+    background: var(--surface);
   }
-  /* One visible focus style for everything that can be focused with the keyboard. */
-  :focus-visible {
-    @apply outline-2 outline-offset-2 outline-indigo-600 dark:outline-indigo-400;
+  .rollout-range::-moz-range-track {
+    height: 0.375rem;
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 0 0 1px var(--line);
+    background: var(--subtle);
+  }
+  .rollout-range::-moz-range-progress {
+    height: 0.375rem;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+  }
+  .rollout-range::-moz-range-thumb {
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--accent);
+    background: var(--surface);
+  }
+}
+
+/* Pills show the share of a rollout as a small bar; `--p` is set on the element. */
+.meter {
+  background: linear-gradient(
+    to right,
+    currentColor var(--p),
+    color-mix(in srgb, currentColor 25%, transparent) var(--p)
+  );
+}
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .meter {
+    background: currentColor;
+    opacity: 0.6;
+  }
+}
+
+.icon {
+  flex: none;
+}
+
+/* The one shadow in the app: a hairline ring plus a soft lift for dialogs. */
+.dialog-shadow {
+  box-shadow:
+    0 0 0 1px var(--line),
+    0 24px 48px -12px color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    transition-duration: 0ms !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
   }
 }

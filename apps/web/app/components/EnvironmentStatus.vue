@@ -6,22 +6,29 @@ import { summarizeEnvironment } from '~/utils/flag-summary';
 const props = defineProps<{ environment: FlagEnvironmentView }>();
 const summary = computed(() => summarizeEnvironment(props.environment));
 
+// Words carry the state; colour and the small meter only help.
 const tones = {
-  danger:
-    'border-red-300 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100',
-  on: 'border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-100',
-  partial:
-    'border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100',
-  off: 'border-slate-300 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300',
+  danger: 'bg-kill text-kill-fg',
+  on: 'bg-on-subtle text-on',
+  partial: 'bg-accent-subtle text-accent-ink',
+  off: 'bg-subtle text-muted',
 } as const;
 </script>
 
 <template>
-  <span
-    class="inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium"
-    :class="tones[summary.tone]"
-  >
-    <span class="font-mono uppercase opacity-70">{{ environment.environment }}</span>
-    <span>{{ summary.label }}</span>
+  <span class="inline-flex min-w-32 flex-col gap-0.5">
+    <span class="font-mono text-small text-faint">{{ environment.environment }}</span>
+    <span
+      class="inline-flex h-5 w-fit items-center gap-1.5 rounded-sm px-1.5 text-small font-medium whitespace-nowrap tabular-nums"
+      :class="tones[summary.tone]"
+    >
+      <span
+        v-if="summary.tone === 'partial'"
+        class="meter h-1 w-[18px] rounded-sm"
+        :style="{ '--p': `${environment.rolloutPercentage}%` }"
+        aria-hidden="true"
+      />
+      {{ summary.label }}
+    </span>
   </span>
 </template>

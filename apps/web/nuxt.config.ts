@@ -25,10 +25,27 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'color-scheme', content: 'light dark' },
+        // The browser chrome follows the system theme; the in-app toggle cannot change it without a script.
+        { name: 'theme-color', content: '#F7F7F5', media: '(prefers-color-scheme: light)' },
+        { name: 'theme-color', content: '#0D0D0E', media: '(prefers-color-scheme: dark)' },
       ],
       // A blocking script in the head, from a file (not inline, so a strict Content-Security-Policy still works):
       // it sets the theme class before the first paint, so there is no flash of the wrong theme.
       script: [{ src: '/theme-init.js' }],
+      // The main font starts loading with the HTML. `crossorigin` is required for font preloads, even on one origin.
+      link: [
+        {
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff2',
+          href: '/fonts/geologica-latin.woff2',
+          crossorigin: 'anonymous',
+        },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicon-16.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+      ],
     },
   },
   nitro: {

@@ -32,22 +32,23 @@ onMounted(() => void nextTick(() => heading.value?.focus()));
   <section
     role="alert"
     aria-labelledby="conflict-title"
-    class="space-y-3 rounded-lg border border-amber-400 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-950"
+    class="space-y-3 rounded-md border border-warn/50 bg-warn-subtle p-4"
   >
     <h3
       id="conflict-title"
       ref="heading"
       tabindex="-1"
-      class="font-semibold text-amber-950 dark:text-amber-100"
+      class="flex items-center gap-2 font-semibold text-ink"
     >
+      <AppIcon name="warning" class="shrink-0 text-warn" />
       {{ environment }} was changed while you were working
     </h3>
-    <p class="text-sm text-amber-950 dark:text-amber-100">
+    <p class="text-body text-ink">
       {{ who }} made a change at <time :datetime="when">{{ formatDateTime(when) }}</time
       >. Nothing you typed has been lost, and nothing has been overwritten.
     </p>
 
-    <dl class="space-y-1 text-sm text-amber-950 dark:text-amber-100">
+    <dl class="space-y-1 text-body text-ink">
       <div v-if="summary.theirs.length > 0" class="flex flex-wrap gap-x-2">
         <dt class="font-medium">Changed by them:</dt>
         <dd>{{ summary.theirs.join(', ') }}</dd>
@@ -57,7 +58,7 @@ onMounted(() => void nextTick(() => heading.value?.focus()));
         <dd>{{ summary.mine.join(', ') }}</dd>
       </div>
     </dl>
-    <p v-if="summary.both.length > 0" class="text-sm font-medium text-red-900 dark:text-red-200">
+    <p v-if="summary.both.length > 0" class="text-body font-medium text-ink">
       You both changed {{ summary.both.join(', ') }}. If you apply your changes, yours replace
       theirs there.
     </p>
@@ -66,7 +67,7 @@ onMounted(() => void nextTick(() => heading.value?.focus()));
       <button
         type="button"
         :disabled="pending"
-        class="rounded-md border border-amber-500 bg-white px-3 py-1.5 text-sm font-medium hover:bg-amber-100 disabled:opacity-60 dark:bg-amber-900 dark:hover:bg-amber-800"
+        class="h-7 rounded-sm border border-edge bg-surface px-3 text-body font-medium text-ink hover:bg-subtle disabled:opacity-60"
         @click="$emit('load-latest')"
       >
         Load latest
@@ -76,13 +77,13 @@ onMounted(() => void nextTick(() => heading.value?.focus()));
         v-if="hasMine"
         type="button"
         :disabled="pending"
-        class="rounded-md bg-amber-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-800 disabled:opacity-60"
+        class="h-7 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90 disabled:opacity-60"
         @click="$emit('apply-mine')"
       >
         Apply my changes on latest
       </button>
     </div>
-    <p class="text-xs text-amber-900 dark:text-amber-200">
+    <p class="text-small text-ink">
       “Load latest” shows the current state and drops your changes. “Apply my changes on latest”
       keeps them on top of the current state so you can review them and save again.
     </p>

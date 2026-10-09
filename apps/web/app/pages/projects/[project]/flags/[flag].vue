@@ -121,10 +121,12 @@ const selectedEditor = computed(() => editors.value[selected.value]);
 
 <template>
   <section aria-labelledby="flag-title">
-    <nav aria-label="Flag breadcrumb" class="text-sm text-slate-600 dark:text-slate-400">
-      <NuxtLink :to="`/projects/${projectKey}`" class="hover:underline">Flags</NuxtLink>
-      <span aria-hidden="true"> / </span>
-      <span>{{ flag.data.value?.name ?? route.params.flag }}</span>
+    <nav aria-label="Flag breadcrumb" class="flex items-center gap-1.5 text-small text-muted">
+      <NuxtLink :to="`/projects/${projectKey}`" class="rounded-sm hover:text-ink hover:underline"
+        >Flags</NuxtLink
+      >
+      <AppIcon name="chevron" :size="12" />
+      <span class="wrap-anywhere">{{ flag.data.value?.name ?? route.params.flag }}</span>
     </nav>
 
     <ResourceState
@@ -135,26 +137,23 @@ const selectedEditor = computed(() => editors.value[selected.value]);
       @retry="flag.reload()"
     >
       <div v-if="flag.data.value" class="mt-2">
-        <div class="flex flex-wrap items-baseline gap-3">
-          <h2 id="flag-title" class="text-xl font-semibold">{{ flag.data.value.name }}</h2>
-          <p class="font-mono text-sm text-slate-600 dark:text-slate-400">
-            {{ flag.data.value.key }}
-          </p>
-          <span class="rounded bg-slate-200 px-1.5 py-0.5 text-xs dark:bg-slate-700">{{
-            flag.data.value.type
-          }}</span>
-          <span
-            v-if="flag.data.value.clientVisible"
-            class="rounded bg-sky-100 px-1.5 py-0.5 text-xs text-sky-900 dark:bg-sky-900 dark:text-sky-100"
-          >
-            client-visible
-          </span>
-          <span v-if="archived" class="rounded bg-slate-300 px-1.5 py-0.5 text-xs dark:bg-slate-600"
-            >archived</span
-          >
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 id="flag-title" class="text-title wrap-anywhere">{{ flag.data.value.name }}</h2>
           <LiveIndicator :status="liveStatus" class="ml-auto" />
         </div>
-        <p v-if="flag.data.value.description" class="mt-2 text-slate-700 dark:text-slate-300">
+        <p class="mt-1 flex flex-wrap items-center gap-2 text-small text-muted">
+          <span class="font-mono wrap-anywhere">{{ flag.data.value.key }}</span>
+          <span class="rounded-sm border border-line px-1.5">{{ flag.data.value.type }}</span>
+          <span
+            v-if="flag.data.value.clientVisible"
+            class="inline-flex items-center gap-1 rounded-sm border border-line px-1.5"
+          >
+            <AppIcon name="eye" :size="12" />
+            client-visible
+          </span>
+          <span v-if="archived" class="rounded-sm bg-subtle px-1.5">archived</span>
+        </p>
+        <p v-if="flag.data.value.description" class="mt-2 text-body text-ink wrap-anywhere">
           {{ flag.data.value.description }}
         </p>
 

@@ -61,29 +61,29 @@ async function onSubmit(): Promise<void> {
   });
 }
 
-const inputClass =
-  'mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-950';
+const inputClass = 'mt-1 block w-full rounded-sm border border-edge bg-surface h-8 px-2.5';
 </script>
 
 <template>
   <form
     novalidate
-    class="space-y-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+    class="space-y-4 rounded-md border border-line bg-surface p-4"
     aria-labelledby="new-flag-title"
     @submit.prevent="onSubmit"
   >
-    <h2 id="new-flag-title" class="text-lg font-semibold">New flag</h2>
+    <h2 id="new-flag-title" class="text-section font-semibold">New flag</h2>
 
     <p
       v-if="error"
       role="alert"
-      class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+      class="flex items-start gap-2 rounded-sm border border-kill/40 bg-kill-subtle px-3 py-2 text-body text-ink"
     >
-      {{ error }}
+      <AppIcon name="warning" class="mt-0.5 shrink-0 text-danger" />
+      <span>{{ error }}</span>
     </p>
 
     <div>
-      <label for="flag-name" class="block text-sm font-medium">Name</label>
+      <label for="flag-name" class="block text-body font-medium">Name</label>
       <input
         id="flag-name"
         :ref="(el) => (fields.name!.value = el as HTMLInputElement | null)"
@@ -94,17 +94,14 @@ const inputClass =
         :aria-describedby="errors.name ? 'flag-name-error' : undefined"
         :class="inputClass"
       />
-      <p
-        v-if="errors.name"
-        id="flag-name-error"
-        class="mt-1 text-sm text-red-700 dark:text-red-300"
-      >
+      <p v-if="errors.name" id="flag-name-error" class="mt-1 text-body text-danger">
+        <AppIcon name="warning" :size="12" />
         {{ errors.name }}
       </p>
     </div>
 
     <div>
-      <label for="flag-key" class="block text-sm font-medium">Key</label>
+      <label for="flag-key" class="block text-body font-medium">Key</label>
       <input
         id="flag-key"
         :ref="(el) => (fields.key!.value = el as HTMLInputElement | null)"
@@ -114,35 +111,38 @@ const inputClass =
         spellcheck="false"
         aria-describedby="flag-key-hint"
         :aria-invalid="errors.key ? 'true' : undefined"
-        :class="[inputClass, 'font-mono text-sm']"
+        :class="[inputClass, 'font-mono text-body']"
         @input="keyEdited = true"
       />
-      <p id="flag-key-hint" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p id="flag-key-hint" class="mt-1 text-body text-muted">
         What your code asks for. It cannot be changed later.
       </p>
-      <p v-if="errors.key" id="flag-key-error" class="mt-1 text-sm text-red-700 dark:text-red-300">
+      <p v-if="errors.key" id="flag-key-error" class="mt-1 text-body text-danger">
+        <AppIcon name="warning" :size="12" />
         {{ errors.key }}
       </p>
     </div>
 
     <div>
-      <label for="flag-description" class="block text-sm font-medium">Description (optional)</label>
+      <label for="flag-description" class="block text-body font-medium"
+        >Description (optional)</label
+      >
       <textarea
         id="flag-description"
         v-model="description"
         rows="2"
         maxlength="1000"
-        :class="inputClass"
+        :class="[inputClass, 'h-auto py-1.5']"
       />
     </div>
 
     <fieldset>
-      <legend class="text-sm font-medium">Type</legend>
+      <legend class="text-body font-medium">Type</legend>
       <div class="mt-1 flex gap-6">
-        <label class="flex items-center gap-2 text-sm">
+        <label class="flex items-center gap-2 text-body">
           <input v-model="type" type="radio" name="flag-type" value="boolean" /> Boolean (on or off)
         </label>
-        <label class="flex items-center gap-2 text-sm">
+        <label class="flex items-center gap-2 text-body">
           <input v-model="type" type="radio" name="flag-type" value="string" /> String (two values)
         </label>
       </div>
@@ -150,7 +150,7 @@ const inputClass =
 
     <div v-if="type === 'string'" class="grid gap-4 sm:grid-cols-2">
       <div>
-        <label for="flag-on-value" class="block text-sm font-medium">Value when on</label>
+        <label for="flag-on-value" class="block text-body font-medium">Value when on</label>
         <input
           id="flag-on-value"
           :ref="(el) => (fields.onValue!.value = el as HTMLInputElement | null)"
@@ -161,16 +161,13 @@ const inputClass =
           :aria-describedby="errors.onValue ? 'flag-on-value-error' : undefined"
           :class="inputClass"
         />
-        <p
-          v-if="errors.onValue"
-          id="flag-on-value-error"
-          class="mt-1 text-sm text-red-700 dark:text-red-300"
-        >
+        <p v-if="errors.onValue" id="flag-on-value-error" class="mt-1 text-body text-danger">
+          <AppIcon name="warning" :size="12" />
           {{ errors.onValue }}
         </p>
       </div>
       <div>
-        <label for="flag-off-value" class="block text-sm font-medium">Value when off</label>
+        <label for="flag-off-value" class="block text-body font-medium">Value when off</label>
         <input
           id="flag-off-value"
           :ref="(el) => (fields.offValue!.value = el as HTMLInputElement | null)"
@@ -181,22 +178,19 @@ const inputClass =
           :aria-describedby="errors.offValue ? 'flag-off-value-error' : undefined"
           :class="inputClass"
         />
-        <p
-          v-if="errors.offValue"
-          id="flag-off-value-error"
-          class="mt-1 text-sm text-red-700 dark:text-red-300"
-        >
+        <p v-if="errors.offValue" id="flag-off-value-error" class="mt-1 text-body text-danger">
+          <AppIcon name="warning" :size="12" />
           {{ errors.offValue }}
         </p>
       </div>
     </div>
 
     <div>
-      <label class="flex items-center gap-2 text-sm font-medium">
+      <label class="flex items-center gap-2 text-body font-medium">
         <input v-model="clientVisible" type="checkbox" aria-describedby="client-visible-hint" />
         Visible to client keys
       </label>
-      <p id="client-visible-hint" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <p id="client-visible-hint" class="mt-1 text-body text-muted">
         Client keys are meant for browsers and apps. Leave this off for flags that only your servers
         should see.
       </p>
@@ -206,13 +200,13 @@ const inputClass =
       <button
         type="submit"
         :disabled="pending"
-        class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+        class="rounded-sm bg-accent h-8 px-3 font-medium text-accent-fg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {{ pending ? 'Creating…' : 'Create flag' }}
       </button>
       <button
         type="button"
-        class="rounded-md border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+        class="rounded-sm border border-edge h-8 px-3 font-medium hover:bg-subtle"
         @click="emit('cancel')"
       >
         Cancel

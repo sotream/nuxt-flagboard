@@ -14,36 +14,42 @@ async function signOut(): Promise<void> {
   <div class="min-h-screen">
     <a
       href="#main"
-      class="sr-only rounded bg-indigo-600 px-3 py-2 text-white focus:not-sr-only focus:absolute focus:left-2 focus:top-2"
+      class="sr-only rounded-sm bg-accent px-3 py-2 text-accent-fg focus:not-sr-only focus:absolute focus:left-2 focus:top-2"
     >
       Skip to content
     </a>
-    <header class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <nav aria-label="Main" class="flex items-center gap-6">
-          <NuxtLink to="/" class="text-lg font-semibold tracking-tight">Flagboard</NuxtLink>
+    <header class="border-b border-line bg-surface">
+      <div
+        class="mx-auto flex min-h-11 max-w-6xl flex-wrap items-center gap-x-3 gap-y-1.5 px-6 py-1.5"
+      >
+        <nav aria-label="Main" class="flex items-center">
+          <NuxtLink to="/" class="flex items-center gap-2 rounded-sm text-ink">
+            <BrandMark />
+            <span class="text-section font-semibold tracking-tight">Flagboard</span>
+          </NuxtLink>
         </nav>
-        <div class="flex items-center gap-3">
-          <p v-if="session.state.user" class="text-sm text-slate-600 dark:text-slate-400">
-            <span class="sr-only">Signed in as </span>{{ session.state.user.email }}
-            <span
-              class="ml-1 rounded-full bg-slate-200 px-2 py-0.5 text-xs font-medium text-slate-800 dark:bg-slate-700 dark:text-slate-100"
-            >
-              {{ session.state.user.role }}
-            </span>
-          </p>
-          <ThemeToggle />
-          <button
-            type="button"
-            class="rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-            @click="signOut"
-          >
-            Sign out
-          </button>
-        </div>
+        <span class="hidden flex-1 sm:block" aria-hidden="true" />
+        <p v-if="session.state.user" class="flex min-w-0 items-center gap-2 text-small text-muted">
+          <span class="sr-only">Signed in as </span>
+          <span class="sr-only md:not-sr-only md:wrap-anywhere">{{
+            session.state.user.email
+          }}</span>
+          <span class="rounded-sm border border-line px-1.5 text-ink">
+            {{ session.state.user.role }}
+          </span>
+        </p>
+        <ThemeToggle />
+        <button
+          type="button"
+          class="inline-flex h-7 items-center gap-1.5 rounded-sm border border-edge px-2 text-small font-medium text-ink hover:bg-subtle"
+          @click="signOut"
+        >
+          <AppIcon name="logout" />
+          Sign out
+        </button>
       </div>
     </header>
-    <main id="main" class="mx-auto max-w-6xl px-4 py-6">
+    <main id="main" class="mx-auto max-w-6xl px-6 py-6">
       <slot />
     </main>
   </div>

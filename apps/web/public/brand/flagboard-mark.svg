@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 16 16" role="img" aria-label="Flagboard">
+  <style>
+    .line { stroke: #161618; }
+    .accent { fill: #0a6aa6; }
+    @media (prefers-color-scheme: dark) { .line { stroke: #ecece9; } .accent { fill: #5fb4e8; } }
+  </style>
+  <path d="M3.5 2v12.5" class="line" fill="none" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M4.25 3.75H9.5V7.75H4.25z" class="accent"/>
+  <path d="M3.5 3h8.5l-2 2.75 2 2.75H3.5" class="line" fill="none" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

@@ -13,10 +13,11 @@ const label = computed(() => {
 <template>
   <button
     type="button"
-    class="rounded-md border border-slate-300 px-2.5 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+    class="inline-flex h-7 items-center gap-1.5 rounded-sm border border-edge px-2 text-small font-medium text-ink hover:bg-subtle"
     :aria-label="label"
     @click="cycle"
   >
+    <AppIcon :name="theme === 'dark' ? 'moon' : 'sun'" />
     <span aria-hidden="true">{{
       preference === 'system' ? 'Auto' : preference === 'light' ? 'Light' : 'Dark'
     }}</span>

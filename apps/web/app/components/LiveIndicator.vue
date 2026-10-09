@@ -17,21 +17,18 @@ const text = computed(
 const dot = computed(
   () =>
     ({
-      connecting: 'bg-slate-400',
-      live: 'bg-emerald-500',
-      reconnecting: 'bg-amber-500',
-      offline: 'bg-red-500',
-      evicted: 'bg-amber-500',
+      connecting: 'bg-faint',
+      live: 'bg-live motion-safe:animate-pulse',
+      reconnecting: 'bg-warn',
+      offline: 'bg-danger',
+      evicted: 'bg-warn',
     })[props.status],
 );
 </script>
 
 <template>
-  <p
-    class="inline-flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400"
-    :data-status="status"
-  >
-    <span aria-hidden="true" class="h-2 w-2 rounded-full" :class="dot" />
+  <p class="inline-flex items-center gap-1.5 text-small text-muted" :data-status="status">
+    <span aria-hidden="true" class="size-2 rounded-full" :class="dot" />
     <span><span class="sr-only">Live updates: </span>{{ text }}</span>
   </p>
 </template>

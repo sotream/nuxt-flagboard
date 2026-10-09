@@ -30,3 +30,6 @@ pnpm test:browser                 # Playwright flow with an axe scan, from the r
 - Any new inline script breaks the CSP (script hashes are generated at image build). Keep scripts in files.
 - Dev server and image behave differently for headers: check security headers on the built image, not on `nuxt dev`.
 - Do not delete `.nuxt` or `.output` from a script; tell the owner the command instead.
+- Colours, radii and type sizes come from the tokens (`app/assets/css/tokens.css`, mapped in `main.css`): use
+  `bg-surface`, `text-muted`, `border-line` and so on. No palette classes, no `dark:` variants, no raw colours (a test
+  enforces it). Icons come from `AppIcon`. No external fonts, images or scripts (`pnpm --filter web check:assets`).

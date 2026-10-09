@@ -15,6 +15,8 @@ COPY tsconfig.base.json ./
 COPY packages/core packages/core
 COPY apps/web apps/web
 RUN pnpm --filter @flagboard/core build && pnpm --filter web build
+# The site must not point at any other host, or at a file that is missing.
+RUN node apps/web/scripts/check-external-refs.mjs apps/web/.output/public apps/web/public
 # Fill the Content-Security-Policy with the hashes of the inline scripts Nuxt just generated.
 RUN node apps/web/docker/render-nginx-conf.ts apps/web/.output/public apps/web/docker/default.conf.template /default.conf.template
 

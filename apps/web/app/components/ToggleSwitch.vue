@@ -26,18 +26,18 @@ const labelId = useId();
       :aria-describedby="describedby"
       :aria-busy="busy ? 'true' : undefined"
       :disabled="disabled"
-      class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-      :class="modelValue ? 'bg-emerald-600' : 'bg-slate-400 dark:bg-slate-600'"
+      class="relative inline-flex h-5 w-[34px] shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+      :class="modelValue ? 'bg-on' : 'bg-edge'"
       @click="$emit('update:modelValue', !modelValue)"
     >
       <span
         aria-hidden="true"
-        class="inline-block h-5 w-5 rounded-full bg-white shadow transition-transform"
-        :class="modelValue ? 'translate-x-5' : 'translate-x-0.5'"
+        class="inline-block size-4 rounded-full bg-surface transition-transform"
+        :class="modelValue ? 'translate-x-[16px]' : 'translate-x-0.5'"
       />
     </button>
-    <span :id="labelId" class="text-sm font-medium">{{ label }}</span>
-    <span aria-hidden="true" class="text-sm text-slate-600 dark:text-slate-400">
+    <span :id="labelId" class="text-body font-medium">{{ label }}</span>
+    <span aria-hidden="true" class="text-small text-muted">
       {{ busy ? 'Saving…' : modelValue ? 'On' : 'Off' }}
     </span>
   </div>

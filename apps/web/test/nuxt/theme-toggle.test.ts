@@ -11,6 +11,13 @@ describe('ThemeToggle', () => {
     document.documentElement.classList.remove('dark');
   });
 
+  it('shows a decorative icon for the theme in use', async () => {
+    const wrapper = await mountSuspended(ThemeToggle);
+    expect(wrapper.get('svg').attributes('aria-hidden')).toBe('true');
+    expect(wrapper.get('svg').html()).toContain('circle'); // the sun, while the theme is light
+    document.documentElement.classList.remove('dark');
+  });
+
   it('describes the current theme for screen readers and cycles on press', async () => {
     const wrapper = await mountSuspended(ThemeToggle);
     const button = wrapper.get('button');

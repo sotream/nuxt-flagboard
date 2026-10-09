@@ -54,14 +54,15 @@ function onSubmit(): void {
     ref="dialog"
     :aria-labelledby="titleId"
     :aria-describedby="descriptionId"
-    class="m-auto w-full max-w-md rounded-xl border border-slate-300 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-black/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    class="dialog-shadow m-auto w-full max-w-md rounded-md border border-line bg-surface p-0 text-ink backdrop:bg-ink/50"
     @cancel.prevent="emit('cancel')"
   >
     <form novalidate class="space-y-4 p-6" @submit.prevent="onSubmit">
-      <h2 :id="titleId" class="text-lg font-semibold">
-        Switch off {{ flagName }} in {{ environment }}?
+      <h2 :id="titleId" class="flex items-center gap-2 text-section font-semibold">
+        <AppIcon name="kill" class="shrink-0 text-danger" />
+        <span class="wrap-anywhere">Switch off {{ flagName }} in {{ environment }}?</span>
       </h2>
-      <p :id="descriptionId" class="text-sm text-slate-700 dark:text-slate-300">
+      <p :id="descriptionId" class="text-small text-muted">
         The kill switch makes this flag serve its off value in
         <strong>{{ environment }}</strong> straight away, whatever its rollout and rules say. Use it
         when something is wrong. The reason is kept in the audit log.
@@ -70,13 +71,13 @@ function onSubmit(): void {
       <p
         v-if="error"
         role="alert"
-        class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+        class="rounded-sm border border-kill/40 bg-kill-subtle px-3 py-2 text-body text-ink"
       >
         {{ error }}
       </p>
 
       <div>
-        <label for="kill-reason" class="block text-sm font-medium">Reason</label>
+        <label for="kill-reason" class="block text-body font-medium">Reason</label>
         <textarea
           id="kill-reason"
           ref="reasonInput"
@@ -85,12 +86,12 @@ function onSubmit(): void {
           maxlength="500"
           :aria-invalid="reasonError ? 'true' : undefined"
           :aria-describedby="reasonError ? 'kill-reason-error' : undefined"
-          class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-950"
+          class="mt-1 block w-full rounded-sm border border-edge bg-surface px-2.5 py-1.5"
         />
         <p
           v-if="reasonError"
           id="kill-reason-error"
-          class="mt-1 text-sm text-red-700 dark:text-red-300"
+          class="mt-1 text-small text-danger font-medium"
         >
           {{ reasonError }}
         </p>
@@ -99,7 +100,7 @@ function onSubmit(): void {
       <div class="flex justify-end gap-3">
         <button
           type="button"
-          class="rounded-md border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+          class="rounded-sm border border-edge h-8 px-3 font-medium hover:bg-subtle"
           @click="emit('cancel')"
         >
           Cancel
@@ -107,7 +108,7 @@ function onSubmit(): void {
         <button
           type="submit"
           :disabled="pending"
-          class="rounded-md bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-sm bg-kill h-8 px-3 font-medium text-kill-fg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ pending ? 'Switching off…' : 'Switch off now' }}
         </button>

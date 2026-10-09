@@ -68,17 +68,18 @@ async function revoke(): Promise<void> {
 <template>
   <section aria-labelledby="keys-title">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="keys-title" class="text-xl font-semibold">API keys</h2>
+      <h2 id="keys-title" class="text-section font-semibold">API keys</h2>
       <button
         v-if="isAdmin && !creating"
         type="button"
-        class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+        class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
         @click="creating = true"
       >
+        <AppIcon name="plus" />
         New key
       </button>
     </div>
-    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+    <p class="mt-1 text-small text-muted">
       SDKs use these to read flags. Keys are stored hashed and shown in full only once, when they
       are created.
     </p>
@@ -109,48 +110,44 @@ async function revoke(): Promise<void> {
           <button
             v-if="isAdmin"
             type="button"
-            class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+            class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
             @click="creating = true"
           >
+            <AppIcon name="plus" />
             New key
           </button>
         </template>
-        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
-          <table class="w-full text-left text-sm">
+        <div class="overflow-x-auto rounded-sm border border-line">
+          <table class="w-full text-left text-body">
             <caption class="sr-only">
               API keys of this project
             </caption>
-            <thead class="bg-slate-100 text-xs uppercase dark:bg-slate-800">
+            <thead class="bg-subtle text-small text-muted">
               <tr>
-                <th scope="col" class="px-3 py-2">Name</th>
-                <th scope="col" class="px-3 py-2">Kind</th>
-                <th scope="col" class="px-3 py-2">Environment</th>
-                <th scope="col" class="px-3 py-2">Key</th>
-                <th scope="col" class="px-3 py-2">Created</th>
-                <th scope="col" class="px-3 py-2">Status</th>
+                <th scope="col" class="px-3 py-2 font-medium">Name</th>
+                <th scope="col" class="px-3 py-2 font-medium">Kind</th>
+                <th scope="col" class="px-3 py-2 font-medium">Environment</th>
+                <th scope="col" class="px-3 py-2 font-medium">Key</th>
+                <th scope="col" class="px-3 py-2 font-medium">Created</th>
+                <th scope="col" class="px-3 py-2 font-medium">Status</th>
                 <th v-if="isAdmin" scope="col" class="px-3 py-2">
                   <span class="sr-only">Actions</span>
                 </th>
               </tr>
             </thead>
-            <tbody
-              class="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900"
-            >
-              <tr v-for="key in list" :key="key.id" :class="key.revokedAt ? 'opacity-60' : ''">
+            <tbody class="divide-y divide-line bg-surface">
+              <tr v-for="key in list" :key="key.id" :class="key.revokedAt ? 'text-muted' : ''">
                 <th scope="row" class="px-3 py-2 font-medium">{{ key.name }}</th>
                 <td class="px-3 py-2">
-                  <span class="rounded bg-slate-200 px-1.5 py-0.5 text-xs dark:bg-slate-700">{{
+                  <span class="rounded-sm border border-line px-1.5 text-small">{{
                     key.kind
                   }}</span>
                 </td>
-                <td class="px-3 py-2 font-mono text-xs uppercase">{{ key.environment }}</td>
-                <td class="px-3 py-2 font-mono text-xs">{{ key.prefix }}…</td>
+                <td class="px-3 py-2 font-mono text-small">{{ key.environment }}</td>
+                <td class="px-3 py-2 font-mono text-small">{{ key.prefix }}…</td>
                 <td class="px-3 py-2">
                   <time :datetime="key.createdAt">{{ formatDate(key.createdAt) }}</time>
-                  <span
-                    v-if="key.createdByEmail"
-                    class="block text-xs text-slate-500 dark:text-slate-400"
-                  >
+                  <span v-if="key.createdByEmail" class="block text-small text-faint">
                     by {{ key.createdByEmail }}
                   </span>
                 </td>
@@ -158,13 +155,13 @@ async function revoke(): Promise<void> {
                   <span v-if="key.revokedAt">
                     Revoked <time :datetime="key.revokedAt">{{ formatDate(key.revokedAt) }}</time>
                   </span>
-                  <span v-else class="text-emerald-800 dark:text-emerald-300">Active</span>
+                  <span v-else class="text-on">Active</span>
                 </td>
                 <td v-if="isAdmin" class="px-3 py-2 text-right">
                   <button
                     v-if="!key.revokedAt"
                     type="button"
-                    class="rounded-md border border-red-400 px-2.5 py-1 text-xs font-medium text-red-800 hover:bg-red-50 dark:border-red-700 dark:text-red-200 dark:hover:bg-red-950"
+                    class="h-6 rounded-sm border border-kill/50 px-2.5 text-small font-medium text-danger hover:bg-kill-subtle"
                     :aria-label="`Revoke ${key.name}`"
                     @click="
                       revokeError = '';

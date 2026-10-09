@@ -91,14 +91,14 @@ function removeCondition(rule: RuleForm, ruleIndex: number, conditionIndex: numb
 }
 
 const field =
-  'mt-1 block w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950';
+  'mt-1 block h-7 w-full rounded-sm border border-edge bg-surface px-2 text-body text-ink disabled:opacity-60';
 const smallButton =
-  'rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800';
+  'inline-flex h-6 items-center gap-1 rounded-sm border border-edge bg-surface px-2 text-small font-medium text-ink hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-45';
 </script>
 
 <template>
   <div class="space-y-3">
-    <p class="text-sm text-slate-600 dark:text-slate-400">
+    <p class="text-small text-muted">
       Rules are checked from top to bottom. The first rule whose conditions all match decides the
       answer, and the rollout is skipped. A user who lacks an attribute does not match a condition
       on it.
@@ -108,22 +108,19 @@ const smallButton =
 
     <p
       v-if="forms.length === 0"
-      class="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-400"
+      class="rounded-md border border-dashed border-edge p-4 text-small text-muted"
     >
       No rules. Everyone is handled by the rollout above.
     </p>
 
     <ol class="space-y-4">
       <li v-for="(rule, ruleIndex) in forms" :key="ruleIndex">
-        <fieldset
-          :disabled="disabled"
-          class="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
-        >
-          <legend class="px-1 text-sm font-semibold">Rule {{ ruleIndex + 1 }}</legend>
+        <fieldset :disabled="disabled" class="rounded-md border border-line bg-surface p-3">
+          <legend class="px-1 text-body font-semibold">Rule {{ ruleIndex + 1 }}</legend>
 
           <div class="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <label :for="`${id}-${ruleIndex}-serve`" class="block text-sm font-medium"
+              <label :for="`${id}-${ruleIndex}-serve`" class="block text-body font-medium"
                 >When all conditions match, serve</label
               >
               <select :id="`${id}-${ruleIndex}-serve`" v-model="rule.serve" :class="field">
@@ -161,7 +158,11 @@ const smallButton =
             </div>
           </div>
 
-          <p v-if="errors[ruleIndex]?.rule" class="mt-2 text-sm text-red-700 dark:text-red-300">
+          <p
+            v-if="errors[ruleIndex]?.rule"
+            class="mt-2 flex items-center gap-1.5 text-small font-medium text-danger"
+          >
+            <AppIcon name="warning" :size="12" />
             {{ errors[ruleIndex]?.rule }}
           </p>
 
@@ -169,19 +170,14 @@ const smallButton =
             <li
               v-for="(condition, conditionIndex) in rule.conditions"
               :key="conditionIndex"
-              class="rounded-md bg-slate-50 p-3 dark:bg-slate-950"
+              class="rounded-sm bg-page p-2"
             >
-              <p
-                v-if="conditionIndex > 0"
-                class="mb-2 text-xs font-semibold uppercase text-slate-500"
-              >
-                and
-              </p>
+              <p v-if="conditionIndex > 0" class="mb-1 text-small font-semibold text-faint">and</p>
               <div class="grid gap-3 sm:grid-cols-[1.2fr_0.8fr_0.8fr_1.4fr_auto] sm:items-start">
                 <div>
                   <label
                     :for="`${id}-${ruleIndex}-${conditionIndex}-attribute`"
-                    class="block text-xs font-medium"
+                    class="block text-small font-medium"
                     >Attribute</label
                   >
                   <input
@@ -199,13 +195,17 @@ const smallButton =
                         ? `${id}-${ruleIndex}-${conditionIndex}-attribute-error`
                         : undefined
                     "
-                    :class="field"
+                    :class="
+                      errors[ruleIndex]?.conditions[conditionIndex]?.attribute
+                        ? [field, 'border-kill ring-1 ring-kill']
+                        : field
+                    "
                   />
                 </div>
                 <div>
                   <label
                     :for="`${id}-${ruleIndex}-${conditionIndex}-operator`"
-                    class="block text-xs font-medium"
+                    class="block text-small font-medium"
                     >Operator</label
                   >
                   <select
@@ -220,7 +220,7 @@ const smallButton =
                 <div>
                   <label
                     :for="`${id}-${ruleIndex}-${conditionIndex}-type`"
-                    class="block text-xs font-medium"
+                    class="block text-small font-medium"
                     >Value type</label
                   >
                   <select
@@ -236,7 +236,7 @@ const smallButton =
                 <div>
                   <label
                     :for="`${id}-${ruleIndex}-${conditionIndex}-value`"
-                    class="block text-xs font-medium"
+                    class="block text-small font-medium"
                   >
                     {{ condition.operator === 'in' ? 'Values' : 'Value' }}
                   </label>
@@ -263,7 +263,11 @@ const smallButton =
                         ? `${id}-${ruleIndex}-${conditionIndex}-value-error`
                         : `${id}-${ruleIndex}-${conditionIndex}-value-hint`
                     "
-                    :class="field"
+                    :class="
+                      errors[ruleIndex]?.conditions[conditionIndex]?.value
+                        ? [field, 'border-kill ring-1 ring-kill']
+                        : field
+                    "
                   />
                 </div>
                 <div v-if="!disabled" class="sm:pt-5">
@@ -280,7 +284,7 @@ const smallButton =
               </div>
               <p
                 :id="`${id}-${ruleIndex}-${conditionIndex}-value-hint`"
-                class="mt-1 text-xs text-slate-500 dark:text-slate-400"
+                class="mt-1 text-small text-faint"
               >
                 <template v-if="condition.operator === 'in'"
                   >Separate values with commas.
@@ -290,15 +294,17 @@ const smallButton =
               <p
                 v-if="errors[ruleIndex]?.conditions[conditionIndex]?.attribute"
                 :id="`${id}-${ruleIndex}-${conditionIndex}-attribute-error`"
-                class="mt-1 text-sm text-red-700 dark:text-red-300"
+                class="mt-1 flex items-center gap-1.5 text-small font-medium text-danger"
               >
+                <AppIcon name="warning" :size="12" />
                 {{ errors[ruleIndex]?.conditions[conditionIndex]?.attribute }}
               </p>
               <p
                 v-if="errors[ruleIndex]?.conditions[conditionIndex]?.value"
                 :id="`${id}-${ruleIndex}-${conditionIndex}-value-error`"
-                class="mt-1 text-sm text-red-700 dark:text-red-300"
+                class="mt-1 flex items-center gap-1.5 text-small font-medium text-danger"
               >
+                <AppIcon name="warning" :size="12" />
                 {{ errors[ruleIndex]?.conditions[conditionIndex]?.value }}
               </p>
             </li>
@@ -311,6 +317,7 @@ const smallButton =
             :disabled="rule.conditions.length >= LIMITS.conditionsPerRule"
             @click="addCondition(rule, ruleIndex)"
           >
+            <AppIcon name="plus" :size="12" />
             Add condition
           </button>
         </fieldset>
@@ -320,13 +327,14 @@ const smallButton =
     <button
       v-if="!disabled"
       type="button"
-      class="rounded-md border border-indigo-400 px-3 py-1.5 text-sm font-medium text-indigo-800 hover:bg-indigo-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-indigo-600 dark:text-indigo-200 dark:hover:bg-indigo-950"
+      class="inline-flex h-7 items-center gap-1.5 rounded-sm border border-edge bg-surface px-3 text-body font-medium text-ink hover:bg-subtle disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="forms.length >= LIMITS.rules"
       @click="addRule"
     >
+      <AppIcon name="plus" />
       Add rule
     </button>
-    <p v-if="forms.length >= LIMITS.rules" class="text-sm text-slate-600 dark:text-slate-400">
+    <p v-if="forms.length >= LIMITS.rules" class="text-small text-muted">
       A flag can have at most {{ LIMITS.rules }} rules per environment.
     </p>
   </div>

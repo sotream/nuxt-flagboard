@@ -55,15 +55,16 @@ async function create(project: { key: string; name: string }): Promise<void> {
 <template>
   <section aria-labelledby="projects-title">
     <div class="flex flex-wrap items-center justify-between gap-3">
-      <h1 id="projects-title" ref="heading" tabindex="-1" class="text-2xl font-semibold">
+      <h1 id="projects-title" ref="heading" tabindex="-1" class="text-title font-semibold">
         Projects
       </h1>
       <button
         v-if="isAdmin && !creating"
         type="button"
-        class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+        class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
         @click="creating = true"
       >
+        <AppIcon name="plus" />
         New project
       </button>
     </div>
@@ -78,14 +79,14 @@ async function create(project: { key: string; name: string }): Promise<void> {
     </div>
 
     <div class="mt-4">
-      <label for="project-search" class="block text-sm font-medium">Search projects</label>
+      <label for="project-search" class="block text-body font-medium">Search projects</label>
       <input
         id="project-search"
         v-model="search"
         type="search"
         autocomplete="off"
         placeholder="Name or key"
-        class="mt-1 block w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+        class="mt-1 block w-full max-w-md rounded-sm border border-edge bg-surface h-8 px-2.5"
       />
     </div>
 
@@ -110,26 +111,30 @@ async function create(project: { key: string; name: string }): Promise<void> {
           <button
             v-if="isAdmin && !searching"
             type="button"
-            class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+            class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
             @click="creating = true"
           >
+            <AppIcon name="plus" />
             New project
           </button>
         </template>
-        <ul class="grid gap-3 sm:grid-cols-2">
+        <ul class="divide-y divide-line overflow-hidden rounded-sm border border-line bg-surface">
           <li v-for="project in list" :key="project.id">
             <NuxtLink
               :to="`/projects/${project.key}`"
-              class="block rounded-lg border border-slate-200 bg-white p-4 hover:border-indigo-400 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500"
+              class="flex items-center gap-4 px-3 py-2.5 hover:bg-subtle focus-visible:-outline-offset-2"
             >
-              <span class="block font-medium">{{ project.name }}</span>
-              <span class="mt-1 block font-mono text-sm text-slate-600 dark:text-slate-400">{{
-                project.key
-              }}</span>
-              <span class="mt-2 block text-xs text-slate-500 dark:text-slate-400">
+              <span class="min-w-0 flex-1">
+                <span class="block font-semibold wrap-anywhere">{{ project.name }}</span>
+                <span class="block font-mono text-small text-muted wrap-anywhere">{{
+                  project.key
+                }}</span>
+              </span>
+              <span class="text-small text-muted">
                 Created
                 <time :datetime="project.createdAt">{{ formatDate(project.createdAt) }}</time>
               </span>
+              <AppIcon name="chevron" class="shrink-0 text-faint" />
             </NuxtLink>
           </li>
         </ul>

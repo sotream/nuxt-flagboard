@@ -73,15 +73,16 @@ async function create(flag: NewFlag): Promise<void> {
   <section aria-labelledby="flags-title">
     <div class="flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <h2 id="flags-title" class="text-xl font-semibold">Flags</h2>
+        <h2 id="flags-title" class="text-section font-semibold">Flags</h2>
         <LiveIndicator :status="liveStatus" />
       </div>
       <button
         v-if="isAdmin && !creating"
         type="button"
-        class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+        class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
         @click="creating = true"
       >
+        <AppIcon name="plus" />
         New flag
       </button>
     </div>
@@ -97,18 +98,19 @@ async function create(flag: NewFlag): Promise<void> {
 
     <div class="mt-4 flex flex-wrap items-end gap-4">
       <div class="grow sm:max-w-md">
-        <label for="flag-search" class="block text-sm font-medium">Search flags</label>
+        <label for="flag-search" class="block text-body font-medium">Search flags</label>
         <input
           id="flag-search"
           v-model="search"
           type="search"
           autocomplete="off"
           placeholder="Name or key"
-          class="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+          class="mt-1 block w-full rounded-sm border border-edge bg-surface h-8 px-2.5"
         />
       </div>
-      <label class="flex items-center gap-2 pb-2 text-sm">
-        <input v-model="showArchived" type="checkbox" /> Show archived flags
+      <label class="flex items-center gap-2 pb-2 text-body">
+        <input v-model="showArchived" type="checkbox" class="size-4 accent-accent" /> Show archived
+        flags
       </label>
     </div>
 
@@ -133,51 +135,58 @@ async function create(flag: NewFlag): Promise<void> {
           <button
             v-if="isAdmin && !filtering"
             type="button"
-            class="rounded-md bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700"
+            class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90"
             @click="creating = true"
           >
+            <AppIcon name="plus" />
             New flag
           </button>
         </template>
-        <ul class="space-y-3">
+        <ul class="divide-y divide-line overflow-hidden rounded-sm border border-line bg-surface">
           <li v-for="flag in list" :key="flag.key">
             <NuxtLink
               :to="`/projects/${projectKey}/flags/${encodeURIComponent(flag.key)}`"
-              class="block rounded-lg border border-slate-200 bg-white p-4 hover:border-indigo-400 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500"
+              class="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 py-2.5 hover:bg-subtle focus-visible:-outline-offset-2"
             >
-              <span class="flex flex-wrap items-center gap-2">
-                <span class="font-medium">{{ flag.name }}</span>
-                <span class="font-mono text-sm text-slate-600 dark:text-slate-400">{{
+              <span class="min-w-0 flex-1 basis-60">
+                <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <span class="font-semibold wrap-anywhere">{{ flag.name }}</span>
+                  <AppIcon
+                    v-if="flag.clientVisible"
+                    name="eye"
+                    :size="14"
+                    label="Visible to client keys"
+                    class="text-muted"
+                  />
+                  <span
+                    v-if="flag.type !== 'boolean'"
+                    class="rounded-sm border border-line px-1.5 text-small text-muted"
+                    >{{ flag.type }}</span
+                  >
+                  <span
+                    v-if="flag.archivedAt"
+                    class="rounded-sm bg-subtle px-1.5 text-small text-muted"
+                  >
+                    archived
+                  </span>
+                </span>
+                <span class="block font-mono text-small text-muted wrap-anywhere">{{
                   flag.key
                 }}</span>
-                <span class="rounded bg-slate-200 px-1.5 py-0.5 text-xs dark:bg-slate-700">{{
-                  flag.type
-                }}</span>
                 <span
-                  v-if="flag.clientVisible"
-                  class="rounded bg-sky-100 px-1.5 py-0.5 text-xs text-sky-900 dark:bg-sky-900 dark:text-sky-100"
+                  v-if="flag.description"
+                  class="mt-0.5 block text-small text-muted wrap-anywhere"
+                  >{{ flag.description }}</span
                 >
-                  client-visible
-                </span>
-                <span
-                  v-if="flag.archivedAt"
-                  class="rounded bg-slate-300 px-1.5 py-0.5 text-xs text-slate-900 dark:bg-slate-600 dark:text-slate-50"
-                >
-                  archived
-                </span>
               </span>
-              <span
-                v-if="flag.description"
-                class="mt-1 block text-sm text-slate-600 dark:text-slate-400"
-                >{{ flag.description }}</span
-              >
-              <span class="mt-3 flex flex-wrap gap-2">
+              <span class="flex flex-wrap gap-3">
                 <EnvironmentStatus
                   v-for="environment in flag.environments"
                   :key="environment.environment"
                   :environment="environment"
                 />
               </span>
+              <AppIcon name="chevron" class="hidden shrink-0 text-faint sm:block" />
             </NuxtLink>
           </li>
         </ul>

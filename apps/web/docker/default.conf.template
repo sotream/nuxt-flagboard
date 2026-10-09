@@ -3,6 +3,9 @@ server {
   listen 8080;
   server_name _;
   server_tokens off;
+  # The listen port is the container's own (8080). Without this, the redirect nginx sends for a directory such as
+  # /login names that port and breaks behind any port mapping or reverse proxy.
+  absolute_redirect off;
   root /usr/share/nginx/html;
 
   # Set once here. Locations below must not call add_header: nginx would then drop these.
@@ -40,6 +43,12 @@ server {
   # File names under _nuxt carry a content hash, so they never change.
   location /_nuxt/ {
     expires max;
+    try_files $uri =404;
+  }
+
+  # Fonts keep their file names, so they get a long but finite lifetime. A missing font is a 404, never the app shell.
+  location /fonts/ {
+    expires 30d;
     try_files $uri =404;
   }
 

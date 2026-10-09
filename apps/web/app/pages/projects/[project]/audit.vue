@@ -5,8 +5,8 @@ import { useResource } from '~/composables/useResource';
 import { useSession } from '~/composables/useSession';
 import { ApiError } from '~/utils/api-error';
 import type { AuditEventView, AuditPage, FlagView } from '~/utils/api-types';
-import { actionLabel, describeChanges } from '~/utils/audit-format';
-import { formatDateTime } from '~/utils/format';
+import { describeEvent, groupByDay } from '~/utils/audit-sentence';
+import { formatTime } from '~/utils/format';
 
 const PAGE_SIZE = 25;
 
@@ -42,6 +42,14 @@ watch(
 watch(flagFilter, () => void first.reload());
 
 const events = computed(() => [...(first.data.value?.items ?? []), ...more.value]);
+// The viewer's own time zone decides where one day ends and the next begins.
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const groups = computed(() =>
+  groupByDay(events.value, new Date(), timeZone).map((group) => ({
+    ...group,
+    items: group.events.map((event) => ({ event, description: describeEvent(event) })),
+  })),
+);
 
 async function loadMore(): Promise<void> {
   if (!cursor.value || loadingMore.value) return;
@@ -65,17 +73,17 @@ async function loadMore(): Promise<void> {
 
 <template>
   <section aria-labelledby="audit-title">
-    <h2 id="audit-title" class="text-xl font-semibold">Audit log</h2>
-    <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+    <h2 id="audit-title" class="text-section font-semibold">Audit log</h2>
+    <p class="mt-1 text-body text-muted">
       Who changed what, newest first. Entries cannot be edited or deleted.
     </p>
 
     <div class="mt-4">
-      <label for="audit-flag" class="block text-sm font-medium">Show</label>
+      <label for="audit-flag" class="block text-body font-medium">Show</label>
       <select
         id="audit-flag"
         v-model="flagFilter"
-        class="mt-1 block w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+        class="mt-1 block h-8 w-full max-w-md rounded-sm border border-edge bg-surface px-2.5 text-body text-ink"
       >
         <option value="">All changes</option>
         <option v-for="flag in flags.data.value ?? []" :key="flag.key" :value="flag.key">
@@ -99,84 +107,85 @@ async function loadMore(): Promise<void> {
         "
         @retry="first.reload()"
       >
-        <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
-          <table class="w-full text-left text-sm">
-            <caption class="sr-only">
-              Changes in this project, newest first
-            </caption>
-            <thead class="bg-slate-100 text-xs uppercase dark:bg-slate-800">
-              <tr>
-                <th scope="col" class="px-3 py-2">When</th>
-                <th scope="col" class="px-3 py-2">Who</th>
-                <th scope="col" class="px-3 py-2">What</th>
-                <th scope="col" class="px-3 py-2">Flag</th>
-                <th scope="col" class="px-3 py-2">Environment</th>
-                <th scope="col" class="px-3 py-2">Changes</th>
-              </tr>
-            </thead>
-            <tbody
-              class="divide-y divide-slate-200 bg-white align-top dark:divide-slate-800 dark:bg-slate-900"
+        <div class="space-y-6">
+          <section
+            v-for="group in groups"
+            :key="group.key"
+            :aria-labelledby="`audit-day-${group.key}`"
+          >
+            <h3 :id="`audit-day-${group.key}`" class="mb-1.5 text-body font-semibold text-muted">
+              {{ group.label }}
+            </h3>
+            <ol
+              class="divide-y divide-line overflow-hidden rounded-md border border-line bg-surface"
             >
-              <tr v-for="event in events" :key="event.id">
-                <td class="whitespace-nowrap px-3 py-2">
-                  <time :datetime="event.createdAt">{{ formatDateTime(event.createdAt) }}</time>
-                </td>
-                <td class="px-3 py-2">{{ event.actorEmail }}</td>
-                <td class="px-3 py-2">{{ actionLabel(event) }}</td>
-                <td class="px-3 py-2 font-mono text-xs">
-                  <NuxtLink
-                    v-if="event.flagKey"
-                    :to="`/projects/${project}/flags/${encodeURIComponent(event.flagKey)}`"
-                    class="underline"
+              <li
+                v-for="{ event, description } in group.items"
+                :key="event.id"
+                class="grid grid-cols-[4.5rem_1.5rem_minmax(0,1fr)] gap-x-3 px-3 py-2.5"
+              >
+                <time
+                  :datetime="event.createdAt"
+                  class="pt-0.5 font-mono text-small whitespace-nowrap tabular-nums text-faint"
+                  >{{ formatTime(event.createdAt) }}</time
+                >
+                <span
+                  class="grid size-6 place-items-center rounded-sm border border-line bg-surface"
+                  :class="description.icon === 'kill' ? 'text-danger' : 'text-muted'"
+                >
+                  <AppIcon :name="description.icon" />
+                </span>
+                <div class="min-w-0">
+                  <p
+                    v-for="sentence in description.sentences"
+                    :key="sentence"
+                    class="font-semibold wrap-anywhere"
                   >
-                    {{ event.flagKey }}
-                  </NuxtLink>
-                  <span v-else aria-label="none">—</span>
-                </td>
-                <td class="px-3 py-2 font-mono text-xs uppercase">
-                  {{ event.environmentKey ?? '—' }}
-                </td>
-                <td class="px-3 py-2">
-                  <ul class="space-y-0.5">
-                    <li v-for="change in describeChanges(event)" :key="change.field">
-                      <span class="font-medium">{{ change.label }}:</span>
-                      <span class="text-slate-600 dark:text-slate-400">{{ change.before }}</span>
-                      <span aria-label="changed to">→</span>
-                      <span>{{ change.after }}</span>
-                    </li>
-                  </ul>
+                    {{ sentence }}
+                  </p>
+                  <div class="mt-0.5 flex flex-wrap items-center gap-x-3 text-small text-muted">
+                    <NuxtLink
+                      v-if="event.flagKey"
+                      :to="`/projects/${project}/flags/${encodeURIComponent(event.flagKey)}`"
+                      class="rounded-sm font-mono underline wrap-anywhere"
+                    >
+                      {{ event.flagKey }}
+                    </NuxtLink>
+                    <span class="wrap-anywhere">{{ event.actorEmail }}</span>
+                  </div>
                   <details class="mt-1">
-                    <summary class="cursor-pointer text-xs text-slate-500 dark:text-slate-400">
+                    <summary class="cursor-pointer text-small text-muted">
                       Raw data<span class="sr-only"> for this change</span>
                     </summary>
-                    <pre
-                      class="mt-1 overflow-x-auto rounded bg-slate-100 p-2 text-xs dark:bg-slate-800"
-                      >{{
-                        JSON.stringify({ before: event.before, after: event.after }, null, 2)
-                      }}</pre>
+                    <pre class="mt-1 overflow-x-auto rounded-sm bg-subtle p-2 text-small">{{
+                      JSON.stringify({ before: event.before, after: event.after }, null, 2)
+                    }}</pre>
                   </details>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </li>
+            </ol>
+          </section>
         </div>
 
         <div class="mt-4">
-          <p v-if="moreError" role="alert" class="mb-2 text-sm text-red-700 dark:text-red-300">
+          <p
+            v-if="moreError"
+            role="alert"
+            class="mb-2 flex items-center gap-1.5 text-body font-medium text-danger"
+          >
+            <AppIcon name="warning" :size="12" />
             {{ moreError }}
           </p>
           <button
             v-if="cursor"
             type="button"
             :disabled="loadingMore"
-            class="rounded-md border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-800"
+            class="h-8 rounded-sm border border-edge bg-surface px-3 font-medium text-ink hover:bg-subtle disabled:opacity-60"
             @click="loadMore"
           >
             {{ loadingMore ? 'Loading…' : 'Load more' }}
           </button>
-          <p v-else-if="events.length > 0" class="text-sm text-slate-500 dark:text-slate-400">
-            That is everything.
-          </p>
+          <p v-else-if="events.length > 0" class="text-body text-faint">That is everything.</p>
         </div>
       </ResourceState>
     </div>

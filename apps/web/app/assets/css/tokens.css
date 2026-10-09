@@ -1,0 +1,48 @@
+/*
+ * Design tokens. The only file in the app that contains colour values. Components use the utilities these
+ * variables are mapped to in main.css (bg-surface, text-muted, border-line, ...). The dark theme is the `dark`
+ * class on <html>, set by /theme-init.js and by the theme toggle.
+ */
+:root {
+  --page: #f7f7f5;
+  --surface: #ffffff;
+  --subtle: #efefeb;
+  --line: #e2e2dd;
+  --edge: #85857e;
+  --ink: #161618;
+  --muted: #5b5b55;
+  --faint: #6a6a63;
+  --accent: #0a6aa6;
+  --accent-fg: #ffffff;
+  --accent-subtle: #e4f0f8;
+  --accent-ink: #07557f;
+  --on: #16773f;
+  --on-subtle: #e3f3e8;
+  --kill: #b3261e;
+  --kill-subtle: #fbe9e7;
+  --kill-fg: #ffffff;
+  --warn: #8f5200;
+  --warn-subtle: #fbf0dc;
+}
+
+:root.dark {
+  --page: #0d0d0e;
+  --surface: #141416;
+  --subtle: #1c1c1f;
+  --line: #2a2a2e;
+  --edge: #76766f;
+  --ink: #ecece9;
+  --muted: #a2a29b;
+  --faint: #8f8f88;
+  --accent: #5fb4e8;
+  --accent-fg: #06131d;
+  --accent-subtle: #0f2433;
+  --accent-ink: #8ccbf2;
+  --on: #4cc384;
+  --on-subtle: #0f2a1c;
+  --kill: #ff7a70;
+  --kill-subtle: #2e1513;
+  --kill-fg: #2b0b08;
+  --warn: #f0b14a;
+  --warn-subtle: #2b2010;
+}

@@ -38,7 +38,7 @@ function onKeydown(event: KeyboardEvent, index: number): void {
   <div
     role="tablist"
     aria-label="Environments"
-    class="flex gap-1 border-b border-slate-200 dark:border-slate-800"
+    class="flex gap-1 overflow-x-auto border-b border-line"
   >
     <button
       v-for="(environment, index) in environments"
@@ -50,18 +50,22 @@ function onKeydown(event: KeyboardEvent, index: number): void {
       :aria-selected="environment.key === modelValue"
       :aria-controls="panelId(environment.key)"
       :tabindex="environment.key === modelValue ? 0 : -1"
-      class="-mb-px border-b-2 px-4 py-2 text-sm font-medium"
+      class="-mb-px inline-flex items-center border-b-2 px-3.5 pb-2 pt-2 text-body font-medium whitespace-nowrap focus-visible:-outline-offset-2"
       :class="
         environment.key === modelValue
-          ? 'border-indigo-600 text-indigo-700 dark:border-indigo-400 dark:text-indigo-300'
-          : 'border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
+          ? 'border-accent text-ink'
+          : 'border-transparent text-muted hover:text-ink'
       "
       @click="select(index)"
       @keydown="onKeydown($event, index)"
     >
-      <span class="font-mono uppercase">{{ environment.key }}</span>
+      <span class="font-mono">{{ environment.key }}</span>
       <span class="sr-only">: </span>
-      <span class="ml-2 text-xs font-normal">{{ environment.status }}</span>
+      <span
+        class="ml-2 text-small font-normal"
+        :class="environment.key === modelValue ? 'text-accent-ink' : 'text-faint'"
+        >{{ environment.status }}</span
+      >
     </button>
   </div>
 </template>

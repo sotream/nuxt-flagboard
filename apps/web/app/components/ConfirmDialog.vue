@@ -41,26 +41,27 @@ watch(
     ref="dialog"
     :aria-labelledby="titleId"
     :aria-describedby="descriptionId"
-    class="m-auto w-full max-w-md rounded-xl border border-slate-300 bg-white p-0 text-slate-900 shadow-xl backdrop:bg-black/50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+    class="dialog-shadow m-auto w-full max-w-md rounded-md border border-line bg-surface p-0 text-ink backdrop:bg-ink/50"
     @cancel.prevent="emit('cancel')"
   >
     <div class="space-y-4 p-6">
-      <h2 :id="titleId" class="text-lg font-semibold">{{ title }}</h2>
-      <p :id="descriptionId" class="text-sm text-slate-700 dark:text-slate-300">
+      <h2 :id="titleId" class="text-section font-semibold">{{ title }}</h2>
+      <p :id="descriptionId" class="text-body text-muted">
         {{ description }}
       </p>
       <p
         v-if="error"
         role="alert"
-        class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+        class="flex items-start gap-2 rounded-sm border border-kill/40 bg-kill-subtle px-3 py-2 text-body text-ink"
       >
-        {{ error }}
+        <AppIcon name="warning" class="mt-0.5 shrink-0 text-danger" />
+        <span>{{ error }}</span>
       </p>
       <div class="flex justify-end gap-3">
         <button
           ref="cancelButton"
           type="button"
-          class="rounded-md border border-slate-300 px-4 py-2 font-medium hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
+          class="rounded-sm border border-edge h-8 px-3 font-medium hover:bg-subtle"
           @click="emit('cancel')"
         >
           Cancel
@@ -68,7 +69,7 @@ watch(
         <button
           type="button"
           :disabled="pending"
-          class="rounded-md bg-red-600 px-4 py-2 font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+          class="rounded-sm bg-kill h-8 px-3 font-medium text-kill-fg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           @click="emit('confirm')"
         >
           {{ pending ? 'Working…' : confirmLabel }}

@@ -43,6 +43,15 @@ describe('contentSecurityPolicy', () => {
     expect(policy).toContain("form-action 'self'");
   });
 
+  it('serves fonts and images from the own origin only', () => {
+    expect(directive('font-src')).toBe("font-src 'self'");
+    expect(directive('img-src')).toBe("img-src 'self' data:");
+  });
+
+  it('names no host and no wildcard in any directive', () => {
+    expect(policy).not.toMatch(/https?:|\*|\/\//);
+  });
+
   it('allows inline styles only (Tailwind and Vue set them)', () => {
     expect(directive('style-src')).toBe("style-src 'self' 'unsafe-inline'");
   });

@@ -23,6 +23,12 @@ async function createServerKey(request: APIRequestContext, origin: string) {
   return {
     key: body.key,
     revoke: () => request.delete(`/api/v1/projects/demo/keys/${body.id}`, { headers }),
+    // Archived flags drop out of the default list, so repeated local runs do not leave "E2E ..." flags behind.
+    archiveFlag: (flagKey: string) =>
+      request.patch(`/api/v1/projects/demo/flags/${flagKey}`, {
+        headers,
+        data: { archived: true },
+      }),
   };
 }
 
@@ -89,5 +95,6 @@ test('sign in, create a flag, switch it on, and the public API follows', async (
     await expect.poll(evaluate).toMatchObject({ value: true });
   } finally {
     await serverKey.revoke();
+    await serverKey.archiveFlag(flagKey);
   }
 });

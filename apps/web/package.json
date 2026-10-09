@@ -11,6 +11,7 @@
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
+    "check:assets": "node scripts/check-external-refs.mjs .output/public public",
     "test": "vitest run"
   },
   "dependencies": {

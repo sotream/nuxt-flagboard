@@ -1,0 +1,52 @@
+@font-face {
+  font-family: 'Geologica';
+  src: url('/fonts/geologica-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0100-017F, U+0131, U+2010-2015, U+2018-201E, U+2020-2022, U+2026,
+    U+2030, U+2039-203A, U+20AC, U+2122, U+2212;
+}
+@font-face {
+  font-family: 'Geologica';
+  src: url('/fonts/geologica-cyrillic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+2116;
+}
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/geist-mono-latin.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range:
+    U+0020-007E, U+00A0-00FF, U+0100-017F, U+0131, U+2010-2015, U+2018-201E, U+2020-2022, U+2026,
+    U+2030, U+2039-203A, U+20AC, U+2122, U+2212;
+}
+/* Local faces with the metrics of Geologica, so the swap does not move lines (measured, see ADR 0013). */
+@font-face {
+  font-family: 'Geologica Fallback';
+  src: local('Arial'), local('ArialMT');
+  font-weight: 100 599;
+  size-adjust: 108.05%;
+  ascent-override: 90.23%;
+  descent-override: 25.45%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Geologica Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT');
+  font-weight: 600 900;
+  size-adjust: 102.41%;
+  ascent-override: 95.21%;
+  descent-override: 26.85%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Geist Mono Fallback';
+  src: local('Courier New'), local('CourierNewPSMT');
+  size-adjust: 100%;
+  ascent-override: 100.5%;
+  descent-override: 29.5%;
+  line-gap-override: 0%;
+}

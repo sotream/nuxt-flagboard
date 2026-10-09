@@ -69,6 +69,19 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('flags page', () => {
+  it('names the type only for flags that are not boolean', async () => {
+    session.request.mockResolvedValue([
+      flag('plain'),
+      flag('editor', { type: 'string', onValue: 'new', offValue: 'old' }),
+    ]);
+    const wrapper = await mountPage();
+    await flushPromises();
+
+    const links = wrapper.findAll('ul a');
+    expect(links[0]!.text()).not.toContain('boolean');
+    expect(links[1]!.text()).toContain('string');
+  });
+
   it('lists flags with their badges and the state of every environment', async () => {
     session.request.mockResolvedValue([
       flag('new-checkout', {
@@ -89,7 +102,9 @@ describe('flags page', () => {
     ]);
     const first = links[0]!.text();
     expect(first).toContain('New checkout');
-    expect(first).toContain('client-visible');
+    // Client visibility is an icon with a name, not a text badge, so the list stays quiet.
+    expect(links[0]!.find('[aria-label="Visible to client keys"]').exists()).toBe(true);
+    expect(links[1]!.find('[aria-label="Visible to client keys"]').exists()).toBe(false);
     expect(first).toContain('Redesigned checkout');
     expect(first).toContain('On · 25%');
     expect(links[1]!.text()).toContain('archived');

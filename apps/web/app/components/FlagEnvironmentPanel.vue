@@ -55,13 +55,9 @@ async function engage(reason: string): Promise<void> {
     role="tabpanel"
     :aria-labelledby="tabId(environment)"
     tabindex="0"
-    class="space-y-6 py-6"
+    class="space-y-4 py-5"
   >
-    <p
-      v-if="readOnlyReason"
-      id="read-only-reason"
-      class="text-sm text-slate-600 dark:text-slate-400"
-    >
+    <p v-if="readOnlyReason" id="read-only-reason" class="text-body text-muted">
       {{ readOnlyReason }}
     </p>
 
@@ -79,83 +75,127 @@ async function engage(reason: string): Promise<void> {
     <p
       v-if="state.error"
       role="alert"
-      class="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+      class="flex items-start gap-2 rounded-md border border-kill/40 bg-kill-subtle px-3 py-2 text-body text-ink"
     >
-      {{ state.error }}
+      <AppIcon name="warning" class="mt-0.5 shrink-0 text-danger" />
+      <span>{{ state.error }}</span>
     </p>
 
-    <section
-      v-if="state.server.killSwitch"
-      aria-labelledby="kill-title"
-      class="rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
-    >
-      <h3 id="kill-title" class="font-semibold text-red-900 dark:text-red-100">
-        Kill switch is on in {{ environment }}
-      </h3>
-      <p class="mt-1 text-sm text-red-800 dark:text-red-200">
-        This flag serves {{ shown(flag.offValue) }} to everyone, whatever else is set.
-        <span v-if="state.server.killReason">Reason: {{ state.server.killReason }}</span>
-      </p>
-      <button
-        v-if="editable"
-        type="button"
-        :disabled="state.saving"
-        class="mt-3 rounded-md border border-red-400 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-100 disabled:opacity-60 dark:border-red-700 dark:text-red-100 dark:hover:bg-red-900"
-        @click="editor.releaseKillSwitch()"
+    <div class="divide-y divide-line overflow-hidden rounded-md border border-line bg-surface">
+      <section
+        v-if="state.server.killSwitch"
+        aria-labelledby="kill-title"
+        class="flex flex-wrap items-center justify-between gap-3 bg-kill-subtle px-4 py-3"
       >
-        Release kill switch
-      </button>
-    </section>
+        <div class="min-w-0 flex-1 basis-72">
+          <h3 id="kill-title" class="flex items-center gap-2 font-semibold text-danger">
+            <AppIcon name="kill" />
+            Kill switch is on in {{ environment }}
+          </h3>
+          <p class="mt-1 text-body text-ink">
+            This flag serves {{ shown(flag.offValue) }} to everyone, whatever else is set.
+            <span v-if="state.server.killReason" class="wrap-anywhere"
+              >Reason: {{ state.server.killReason }}</span
+            >
+          </p>
+        </div>
+        <button
+          v-if="editable"
+          type="button"
+          :disabled="state.saving"
+          class="h-7 rounded-sm border border-edge bg-surface px-3 text-body font-medium text-ink hover:bg-subtle disabled:opacity-60"
+          @click="editor.releaseKillSwitch()"
+        >
+          Release kill switch
+        </button>
+      </section>
 
-    <section aria-labelledby="enabled-title" class="space-y-2">
-      <h3 id="enabled-title" class="sr-only">Enabled</h3>
-      <ToggleSwitch
-        :model-value="state.draft.enabled"
-        :label="`Enabled in ${environment}`"
-        :disabled="!editable || state.saving"
-        :busy="state.saving"
-        :describedby="readOnlyReason ? 'read-only-reason' : 'enabled-hint'"
-        @update:model-value="editor.toggle($event)"
-      />
-      <p id="enabled-hint" class="text-sm text-slate-600 dark:text-slate-400">
-        When on, users who match a rule or fall inside the rollout get {{ shown(flag.onValue) }}.
-        Everyone else, and everyone while it is off, gets {{ shown(flag.offValue) }}.
+      <section aria-labelledby="enabled-title" class="space-y-2 px-4 py-3.5">
+        <h3 id="enabled-title" class="sr-only">Enabled</h3>
+        <ToggleSwitch
+          :model-value="state.draft.enabled"
+          :label="`Enabled in ${environment}`"
+          :disabled="!editable || state.saving"
+          :busy="state.saving"
+          :describedby="readOnlyReason ? 'read-only-reason' : 'enabled-hint'"
+          @update:model-value="editor.toggle($event)"
+        />
+        <p id="enabled-hint" class="text-small text-muted">
+          When on, users who match a rule or fall inside the rollout get {{ shown(flag.onValue) }}.
+          Everyone else, and everyone while it is off, gets {{ shown(flag.offValue) }}.
+        </p>
+      </section>
+
+      <section aria-labelledby="rollout-title" class="space-y-2 px-4 py-3.5">
+        <h3 id="rollout-title" class="font-semibold">Rollout</h3>
+        <RolloutSlider
+          :model-value="state.draft.rolloutPercentage"
+          :disabled="!editable || state.saving"
+          @update:model-value="state.draft.rolloutPercentage = $event"
+        />
+      </section>
+
+      <section aria-labelledby="rules-title" class="space-y-2 px-4 py-3.5">
+        <h3 id="rules-title" class="font-semibold">Targeting rules</h3>
+        <RuleEditor
+          :model-value="state.draft.rules"
+          :disabled="!editable || state.saving"
+          :on-label="shown(flag.onValue)"
+          :off-label="shown(flag.offValue)"
+          @update:model-value="state.draft.rules = $event"
+          @invalid="rulesInvalid = $event"
+        />
+      </section>
+
+      <slot />
+
+      <section
+        v-if="canEdit && !state.server.killSwitch"
+        aria-labelledby="danger-title"
+        class="flex flex-wrap items-center justify-between gap-3 bg-kill-subtle px-4 py-3"
+      >
+        <div class="min-w-0 flex-1 basis-72">
+          <h3 id="danger-title" class="flex items-center gap-2 font-semibold text-danger">
+            <AppIcon name="kill" />
+            Kill switch
+          </h3>
+          <p class="mt-1 text-body text-ink">
+            Switches this flag off in {{ environment }} immediately. Everyone in
+            {{ environment }} gets {{ shown(flag.offValue) }}, whatever else is set. Other
+            environments are not affected.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex h-7 items-center gap-1.5 rounded-sm bg-kill px-3 text-body font-medium text-kill-fg hover:opacity-90"
+          @click="
+            killError = '';
+            killDialogOpen = true;
+          "
+        >
+          <AppIcon name="kill" />
+          Kill switch…
+        </button>
+      </section>
+
+      <p class="px-4 py-2.5 text-small text-faint">
+        Last changed
+        <time :datetime="state.server.updatedAt">{{ formatDateTime(state.server.updatedAt) }}</time>
+        · revision
+        {{ state.server.revision }}
       </p>
-    </section>
-
-    <section aria-labelledby="rollout-title" class="space-y-2">
-      <h3 id="rollout-title" class="font-semibold">Rollout</h3>
-      <RolloutSlider
-        :model-value="state.draft.rolloutPercentage"
-        :disabled="!editable || state.saving"
-        @update:model-value="state.draft.rolloutPercentage = $event"
-      />
-    </section>
-
-    <section aria-labelledby="rules-title" class="space-y-2">
-      <h3 id="rules-title" class="font-semibold">Targeting rules</h3>
-      <RuleEditor
-        :model-value="state.draft.rules"
-        :disabled="!editable || state.saving"
-        :on-label="shown(flag.onValue)"
-        :off-label="shown(flag.offValue)"
-        @update:model-value="state.draft.rules = $event"
-        @invalid="rulesInvalid = $event"
-      />
-    </section>
-
-    <slot />
+    </div>
 
     <div
       v-if="(dirty.length > 0 || rulesInvalid) && editable"
       role="region"
       aria-label="Unsaved changes"
-      class="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-indigo-300 bg-indigo-50 p-3 dark:border-indigo-800 dark:bg-indigo-950"
+      class="sticky bottom-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-edge bg-subtle p-3"
     >
-      <p class="text-sm">
+      <p class="text-body">
         <strong>Unsaved changes:</strong>
         {{ dirty.length > 0 ? labelsOf(dirty) : 'a rule that is not complete yet' }}
-        <span v-if="rulesInvalid" class="block text-red-800 dark:text-red-200">
+        <span v-if="rulesInvalid" class="block text-danger">
           Fix the highlighted rule fields to save.
         </span>
       </p>
@@ -163,7 +203,7 @@ async function engage(reason: string): Promise<void> {
         <button
           type="button"
           :disabled="state.saving || rulesInvalid"
-          class="rounded-md bg-indigo-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+          class="h-7 rounded-sm bg-accent px-3 text-body font-medium text-accent-fg hover:opacity-90 disabled:opacity-60"
           @click="editor.save()"
         >
           {{ state.saving ? 'Saving…' : 'Save changes' }}
@@ -171,7 +211,7 @@ async function engage(reason: string): Promise<void> {
         <button
           type="button"
           :disabled="state.saving"
-          class="rounded-md border border-slate-300 px-4 py-1.5 text-sm font-medium hover:bg-white disabled:opacity-60 dark:border-slate-700 dark:hover:bg-slate-900"
+          class="h-7 rounded-sm border border-edge bg-surface px-3 text-body font-medium text-ink hover:bg-subtle disabled:opacity-60"
           @click="
             editor.discard();
             rulesInvalid = false;
@@ -181,34 +221,6 @@ async function engage(reason: string): Promise<void> {
         </button>
       </div>
     </div>
-
-    <section
-      v-if="canEdit && !state.server.killSwitch"
-      aria-labelledby="danger-title"
-      class="border-t border-slate-200 pt-4 dark:border-slate-800"
-    >
-      <h3 id="danger-title" class="text-sm font-semibold">Emergency</h3>
-      <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
-        Switch the flag off in {{ environment }} immediately.
-      </p>
-      <button
-        type="button"
-        class="mt-2 rounded-md border border-red-400 px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-50 dark:border-red-700 dark:text-red-200 dark:hover:bg-red-950"
-        @click="
-          killError = '';
-          killDialogOpen = true;
-        "
-      >
-        Kill switch…
-      </button>
-    </section>
-
-    <p class="text-xs text-slate-500 dark:text-slate-400">
-      Last changed
-      <time :datetime="state.server.updatedAt">{{ formatDateTime(state.server.updatedAt) }}</time> ·
-      revision
-      {{ state.server.revision }}
-    </p>
 
     <KillSwitchDialog
       :open="killDialogOpen"

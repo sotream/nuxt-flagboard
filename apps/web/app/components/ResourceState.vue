@@ -37,39 +37,45 @@ defineEmits<{ retry: [] }>();
     <div
       v-if="status === 'error'"
       role="alert"
-      class="mb-4 rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+      class="mb-4 flex items-start gap-4 rounded-md border border-kill/40 bg-kill-subtle p-4"
     >
-      <p class="font-medium text-red-900 dark:text-red-100">Could not load {{ label }}</p>
-      <p v-if="error" class="mt-1 text-sm text-red-800 dark:text-red-200">{{ error }}</p>
-      <button
-        type="button"
-        class="mt-3 rounded-md border border-red-400 px-3 py-1.5 text-sm font-medium text-red-900 hover:bg-red-100 dark:border-red-700 dark:text-red-100 dark:hover:bg-red-900"
-        @click="$emit('retry')"
-      >
-        Try again
-      </button>
+      <StateArt variant="error" :size="40" />
+      <div class="min-w-0">
+        <p class="font-semibold text-ink">Could not load {{ label }}</p>
+        <p v-if="error" class="mt-1 text-body text-ink wrap-anywhere">{{ error }}</p>
+        <button
+          type="button"
+          class="mt-3 h-7 rounded-sm border border-edge bg-surface px-3 text-body font-medium text-ink hover:bg-subtle"
+          @click="$emit('retry')"
+        >
+          Try again
+        </button>
+      </div>
     </div>
 
     <div v-if="!hasData && status !== 'error'" role="status" aria-live="polite" aria-busy="true">
       <span class="sr-only">Loading {{ label }}…</span>
-      <ul class="space-y-3" aria-hidden="true">
-        <li
-          v-for="n in 3"
-          :key="n"
-          class="h-16 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800"
-        />
+      <ul
+        class="divide-y divide-line overflow-hidden rounded-md border border-line bg-surface"
+        aria-hidden="true"
+      >
+        <li v-for="n in 3" :key="n" class="flex items-center justify-between gap-6 px-3 py-3.5">
+          <span class="h-3 rounded-sm bg-subtle" :style="{ width: `${[38, 52, 30][n - 1]}%` }" />
+          <span class="h-3 w-24 rounded-sm bg-subtle" />
+        </li>
       </ul>
     </div>
 
     <div
       v-else-if="hasData && empty"
-      class="rounded-lg border border-dashed border-slate-300 p-8 text-center dark:border-slate-700"
+      class="flex flex-col items-start gap-1.5 rounded-md border border-dashed border-edge bg-surface p-6"
     >
-      <p class="font-medium">{{ emptyTitle }}</p>
-      <p v-if="emptyHint" class="mt-1 text-sm text-slate-600 dark:text-slate-400">
+      <StateArt class="mb-2" />
+      <p class="font-semibold">{{ emptyTitle }}</p>
+      <p v-if="emptyHint" class="text-body text-muted">
         {{ emptyHint }}
       </p>
-      <div class="mt-4 flex justify-center">
+      <div class="mt-2 flex">
         <slot name="empty-action" />
       </div>
     </div>

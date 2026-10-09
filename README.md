@@ -10,20 +10,40 @@ It is a portfolio project. It is built to be read and explained, not to be deplo
 
 Taken from the seeded demo data (`pnpm db:seed`), so they show what you get after the quick start.
 
-![A flag with environment tabs, an enabled switch, a 25% rollout and targeting rules](docs/images/flag-detail.png)
+**Flags at a glance.** Every environment of every flag as one pill: on, off, a rollout share, or the kill switch.
 
-When two people edit the same environment, nothing is overwritten. The second person keeps their unsaved draft and
-chooses to load the latest state or apply their changes on top of it.
+![The flag list of a project: per-environment status pills with a small rollout meter](docs/images/flag-list.png)
+
+**One flag, one environment.** The enabled switch, the rollout, the targeting rules and the emergency switch sit in one panel.
+
+![A flag with environment tabs, an enabled switch, a 40% rollout and targeting rules](docs/images/flag-detail.png)
+
+**Targeting rules.** Rules are checked from top to bottom, the first match wins, and types are strict.
+
+![The rule editor: a rule that serves a value to users whose country is one of UA, PL](docs/images/targeting-rules.png)
+
+**Kill switch.** It switches a flag off in one environment immediately, with a reason, and does not touch the others.
+
+![A flag with the kill switch engaged in dev](docs/images/kill-switch.png)
+
+**Two people, one environment.** Nothing is overwritten. The second person keeps their unsaved draft and chooses to load
+the latest state or apply their changes on top of it.
 
 ![The conflict banner: a rollout edited by two people at once](docs/images/conflict-banner.png)
 
-| Dark theme                                                           | Kill switch on                                                 |
-| -------------------------------------------------------------------- | -------------------------------------------------------------- |
-| ![The flag page in the dark theme](docs/images/flag-detail-dark.png) | ![A flag with the kill switch on](docs/images/kill-switch.png) |
+**An audit log people can read.** One sentence per change, grouped by day. The raw before and after values stay one click away.
 
-![The flag list of a project](docs/images/flag-list.png)
+![The audit log: who changed what, as plain sentences](docs/images/audit-log.png)
 
-![The audit log: who changed what, with before and after values](docs/images/audit-log.png)
+**API keys.** Shown once when created, stored only as a hash.
+
+![The API keys page](docs/images/api-keys.png)
+
+**Dark theme and small screens.**
+
+| Dark theme                                                                                     | Phone                                                                                                   |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| <img src="docs/images/flag-detail-dark.png" alt="The flag page in the dark theme" width="560"> | <img src="docs/images/flag-list-mobile.png" alt="The flag list on a 390 pixel wide screen" width="220"> |
 
 ## The problem
 
@@ -169,7 +189,8 @@ single-instance design, and the SPA with a same-origin proxy and CSP.
 - **Advisory client attributes.** Targeting by attributes a client sends can be bypassed (see above).
 - **CSP covers the web image only.** The policy (script hashes, `frame-ancestors 'none'` and so on) is produced by the
   web image's nginx configuration. `pnpm dev` and `nuxt dev` do not send it. `style-src` allows `'unsafe-inline'`.
-- **Browsers tested:** Chromium only. Firefox and Safari were not tested, including the CSP hashes.
+- **Browsers tested:** Chromium only. Firefox and Safari were not tested, including the CSP hashes and the
+  rendering of the typefaces and the rollout meter.
 - **GitHub CI has never run.** The workflows pass `actionlint` and were checked by hand and with local equivalents
   of their commands, but no run on GitHub has been seen.
 - **No deployment target.** There are Dockerfiles for both apps and a Compose file for PostgreSQL only; there is no
@@ -181,8 +202,20 @@ single-instance design, and the SPA with a same-origin proxy and CSP.
   "Live updates paused: too many tabs" and does not reconnect, to avoid tabs evicting each other in a loop.
 - **Browser test runs against `nuxt dev`**, not the built site; the nginx image is checked by hand
   ([testing guide](docs/guides/testing.md)). Images are not vulnerability-scanned.
-- **Accessibility** was checked with an automated scan on one page in light mode, not with a screen reader or on a
-  phone.
+- **Accessibility** was checked with an automated scan (axe) of four pages in both themes and a keyboard-focus
+  test, not with a screen reader or on a phone.
+
+## Third-party notices
+
+The interface fonts are subsets of two families under the SIL Open Font License 1.1, from the
+[`google/fonts`](https://github.com/google/fonts) repository. They are committed in `apps/web/public/fonts/` and are
+never loaded from another server.
+
+- **Geologica**, Copyright 2020 The Geologisk Project Authors
+- **Geist Mono**, Copyright 2024 The Geist Project Authors
+
+The full licence texts are `OFL-Geologica.txt` and `OFL-GeistMono.txt` in that directory; the source commits and hashes
+are in `PROVENANCE.md` there and in [ADR 0013](docs/adr/0013-typography-and-visual-identity.md).
 
 ## Licence
 
