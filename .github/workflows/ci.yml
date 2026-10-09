@@ -111,6 +111,9 @@ jobs:
               -f infra/postgres/init-roles.sql
           done
       - run: pnpm test:e2e
+      # The compiled server runs against the main database, which the e2e tests do not touch (they use
+      # `<name>_test`), so it needs its own migration first.
+      - run: pnpm db:migrate
       # Runs the compiled server, which the unit and e2e tests do not (they run TypeScript sources).
       - run: pnpm --filter api smoke
 
