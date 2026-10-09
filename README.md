@@ -1,5 +1,7 @@
 # Flagboard
 
+[![CI](https://github.com/sotream/nuxt-flagboard/actions/workflows/ci.yml/badge.svg)](https://github.com/sotream/nuxt-flagboard/actions/workflows/ci.yml)
+
 A small feature-flag service: an admin UI to define flags, per-environment rules and percentage rollouts, and an API
 and SDK that applications call to ask "is this flag on for this user?".
 
