@@ -3,7 +3,7 @@ paths:
   - '**/*.spec.ts'
   - '**/*.test.ts'
   - 'apps/api/test/**'
-  - 'apps/web/e2e/**'
+  - 'apps/e2e/**'
 ---
 
 # Testing

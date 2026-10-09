@@ -25,12 +25,14 @@
     "db:migrate:revert": "pnpm --filter api db:migrate:revert",
     "db:migrate:generate": "pnpm --filter api db:migrate:generate",
     "db:seed": "pnpm --filter api db:seed",
-    "demo": "pnpm build && node scripts/demo-clients.ts"
+    "demo": "pnpm build && node scripts/demo-clients.ts",
+    "bench": "node scripts/bench.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@eslint/js": "^10.0.1",
+    "autocannon": "8.0.0",
     "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-sonarjs": "^4.2.2",

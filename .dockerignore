@@ -1,0 +1,18 @@
+# The build context is the repository root, so keep out everything an image does not need.
+.git
+**/node_modules
+**/dist
+**/.nuxt
+**/.output
+**/.turbo
+**/coverage
+**/test-results
+**/playwright-report
+.env
+.env.*
+!.env.example
+docs/superpowers
+.superpowers
+.claude
+.idea
+.vscode

@@ -15,6 +15,7 @@ Vitest, Supertest. Web: Nuxt 4 as an SPA (`ssr: false`), Tailwind, composables (
 ```bash
 pnpm install
 pnpm lint | typecheck | test | test:e2e | build     # test:e2e needs the database running
+pnpm test:browser                                   # Playwright; needs build, migrated and seeded database
 pnpm format:check
 ```
 

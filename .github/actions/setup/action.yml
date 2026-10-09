@@ -1,0 +1,20 @@
+name: Set up Node and pnpm
+description: Installs Node (version from .nvmrc), pnpm (version from package.json) and the locked dependencies.
+
+runs:
+  using: composite
+  steps:
+    # Corepack ships with Node and reads the pnpm version from the `packageManager` field.
+    - name: Enable Corepack
+      shell: bash
+      run: corepack enable
+
+    - name: Set up Node
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
