@@ -79,8 +79,8 @@ describe('POST /api/v1/auth/login', () => {
       password: 'wrong-password-123',
     }).expect(401);
 
-    expect(wrongPassword.body.message).toBe('Invalid email or password');
-    expect(unknownEmail.body.message).toBe(wrongPassword.body.message);
+    expect(wrongPassword.body.detail).toBe('Invalid email or password');
+    expect(unknownEmail.body.detail).toBe(wrongPassword.body.detail);
     expect(refreshCookieOf(wrongPassword)).toBeUndefined();
   });
 

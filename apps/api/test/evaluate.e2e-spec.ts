@@ -230,7 +230,14 @@ describe('POST /v1/evaluate', () => {
     it('rejects a body over 16 KB with 413', async () => {
       const big = { context: { attributes: { a: 'x' } }, padding: 'p'.repeat(17 * 1024) };
       const response = await evaluateWith(serverKey, big).expect(413);
-      expect(response.body).toEqual({ statusCode: 413, message: 'Request body too large' });
+      expect(response.headers['content-type']).toContain('application/problem+json');
+      expect(response.body).toMatchObject({
+        type: 'about:blank',
+        title: 'Payload Too Large',
+        status: 413,
+        detail: 'Request body too large',
+        instance: '/v1/evaluate',
+      });
     });
 
     it('accepts a body just under 16 KB', async () => {
@@ -251,7 +258,12 @@ describe('POST /v1/evaluate', () => {
         .set('Content-Type', 'application/json')
         .send('{"flags": [')
         .expect(400);
-      expect(response.body.statusCode).toBe(400);
+      expect(response.body).toMatchObject({
+        type: 'about:blank',
+        title: 'Bad Request',
+        status: 400,
+      });
+      expect(typeof response.body.detail).toBe('string');
     });
   });
 });

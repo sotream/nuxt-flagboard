@@ -21,6 +21,11 @@ export class FlagboardError extends Error {
     readonly code: FlagboardErrorCode,
     message: string,
     readonly status?: number,
+    /**
+     * How long the API asked clients to wait (`Retry-After`, either form), in milliseconds, on a 429 or 503 that carried
+     * the header. Absent otherwise. Capped at one hour.
+     */
+    readonly retryAfterMs?: number,
   ) {
     super(message);
   }

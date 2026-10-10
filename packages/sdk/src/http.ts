@@ -1,4 +1,5 @@
 import { FlagboardError } from './errors.js';
+import { parseRetryAfter } from './retry-after.js';
 import type { ClientOptions } from './types.js';
 
 export const DEFAULT_TIMEOUT_MS = 2000;
@@ -135,10 +136,24 @@ export class HttpClient {
         status,
       );
     }
-    if (status === 429) {
-      const retryAfter = headers.get('retry-after');
-      const suffix = retryAfter && /^\d+$/.test(retryAfter) ? ` Retry after ${retryAfter} s.` : '';
-      return new FlagboardError('RATE_LIMITED', `Too many requests.${suffix}`, status);
+    if (status === 429 || status === 503) {
+      const retryAfterMs = parseRetryAfter(headers.get('retry-after'), Date.now());
+      if (status === 503) {
+        return new FlagboardError(
+          'SERVER',
+          `The Flagboard API failed with status ${status}`,
+          status,
+          retryAfterMs,
+        );
+      }
+      const suffix =
+        retryAfterMs === undefined ? '' : ` Retry after ${Math.ceil(retryAfterMs / 1000)} s.`;
+      return new FlagboardError(
+        'RATE_LIMITED',
+        `Too many requests.${suffix}`,
+        status,
+        retryAfterMs,
+      );
     }
     if (status >= 500) {
       return new FlagboardError('SERVER', `The Flagboard API failed with status ${status}`, status);

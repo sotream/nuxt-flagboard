@@ -95,6 +95,8 @@ export function createLocalClient(options: LocalClientOptions): LocalClient {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let closed = false;
   let refreshing: Promise<boolean> | undefined;
+  // Set when the API said how long to wait (Retry-After); the next poll is not earlier than this time.
+  let notBefore = 0;
 
   /** Fetches the snapshot. Returns true if it changed, false on 304. Throws FlagboardError. */
   async function load(): Promise<boolean> {
@@ -131,6 +133,9 @@ export function createLocalClient(options: LocalClientOptions): LocalClient {
     // A poll and a manual refresh at the same moment share one request.
     refreshing ??= load()
       .catch((error: unknown) => {
+        if (error instanceof FlagboardError && error.retryAfterMs !== undefined) {
+          notBefore = Date.now() + error.retryAfterMs;
+        }
         report(error);
         return false;
       })
@@ -147,7 +152,8 @@ export function createLocalClient(options: LocalClientOptions): LocalClient {
         // The next poll is only scheduled once this one finished, so a slow API never piles up requests.
         void refresh().finally(schedule);
       },
-      withJitter(pollIntervalMs, random),
+      // Never sooner than the interval, and not before the API said it would be ready (Retry-After).
+      Math.max(withJitter(pollIntervalMs, random), notBefore - Date.now()),
     );
     (timer as { unref?: () => void }).unref?.(); // polling alone must not keep a Node process alive
   }

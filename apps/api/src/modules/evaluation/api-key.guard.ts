@@ -43,7 +43,7 @@ export class ApiKeyGuard implements CanActivate {
 
     const presented = this.bearerToken(request.headers.authorization);
     if (!presented || !isWellFormedApiKey(presented)) {
-      this.fail(ip, response);
+      this.fail(ip, response, presented !== undefined);
     }
     const hash = hashApiKey(presented as string);
 
@@ -54,7 +54,7 @@ export class ApiKeyGuard implements CanActivate {
       }
       principal = (await this.auth.lookup(hash)) ?? undefined;
       if (!principal) {
-        this.fail(ip, response);
+        this.fail(ip, response, true);
       }
     }
     const valid = principal as NonNullable<typeof principal>;
@@ -74,11 +74,15 @@ export class ApiKeyGuard implements CanActivate {
   }
 
   /** Records a failed authentication and throws 401, or 429 once the IP is over its limit. */
-  private fail(ip: string, response: Response): never {
+  private fail(ip: string, response: Response, keyPresented: boolean): never {
     if (this.failures.hit(ip) > this.env.KEY_AUTH_FAILURE_LIMIT_PER_MINUTE) {
       this.tooManyRequests(this.failures.retryAfterSeconds(ip), response);
     }
-    response.setHeader('WWW-Authenticate', 'Bearer');
+    // RFC 9110 §15.5.2 and RFC 6750 §3: a challenge always; an error code only when a key was sent.
+    response.setHeader(
+      'WWW-Authenticate',
+      keyPresented ? 'Bearer error="invalid_token"' : 'Bearer',
+    );
     throw new UnauthorizedException('Invalid or missing API key');
   }
 

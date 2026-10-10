@@ -386,6 +386,71 @@ describe('createLocalClient', () => {
       vi.useRealTimers();
     });
 
+    it('waits for the time the API asks for after a 429 or 503 before it polls again (Retry-After)', async () => {
+      vi.useFakeTimers();
+      const errors: FlagboardError[] = [];
+      const api = fakeApi((call) => {
+        if (call === 1) return snapshotResponse(1);
+        if (call === 2)
+          return new Response('{}', { status: 429, headers: { 'Retry-After': '60' } });
+        if (call === 3)
+          return new Response('{}', { status: 503, headers: { 'Retry-After': '120' } });
+        return new Response(null, { status: 304 });
+      });
+      const client = createLocalClient({
+        baseUrl: 'http://example.test',
+        key: KEY,
+        fetch: api.fetch,
+        pollIntervalMs: 10_000,
+        random: () => 0.5,
+        onError: (e) => errors.push(e),
+      });
+      await client.init();
+
+      await vi.advanceTimersByTimeAsync(10_000); // the normal interval: second call, a 429
+      expect(api.calls).toHaveLength(2);
+      expect(errors.at(-1)).toMatchObject({ code: 'RATE_LIMITED', retryAfterMs: 60_000 });
+
+      await vi.advanceTimersByTimeAsync(59_000); // 10 s would have been enough: it keeps waiting for the API
+      expect(api.calls).toHaveLength(2);
+      await vi.advanceTimersByTimeAsync(2_000);
+      expect(api.calls).toHaveLength(3); // after 60 s, a 503 that asks for 120 s
+      expect(errors.at(-1)).toMatchObject({ code: 'SERVER', retryAfterMs: 120_000 });
+
+      await vi.advanceTimersByTimeAsync(117_000); // the 503 came at 70 s and asked for 120 s: not before 190 s
+      expect(api.calls).toHaveLength(3);
+      await vi.advanceTimersByTimeAsync(4_000);
+      expect(api.calls).toHaveLength(4);
+
+      await vi.advanceTimersByTimeAsync(10_000); // and back to the normal interval
+      expect(api.calls).toHaveLength(5);
+      client.close();
+    });
+
+    it('never polls faster than its own interval because of a short Retry-After', async () => {
+      vi.useFakeTimers();
+      const api = fakeApi((call) =>
+        call === 1
+          ? snapshotResponse(1)
+          : call === 2
+            ? new Response('{}', { status: 429, headers: { 'Retry-After': '1' } })
+            : new Response(null, { status: 304 }),
+      );
+      const client = createLocalClient({
+        baseUrl: 'http://example.test',
+        key: KEY,
+        fetch: api.fetch,
+        pollIntervalMs: 10_000,
+        random: () => 0.5,
+      });
+      await client.init();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(api.calls).toHaveLength(2);
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(api.calls).toHaveLength(2);
+      client.close();
+    });
+
     it('polls on the interval with jitter and asks for 304s', async () => {
       vi.useFakeTimers();
       const api = fakeApi((call) =>

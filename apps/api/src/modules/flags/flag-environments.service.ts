@@ -185,8 +185,6 @@ export class FlagEnvironmentsService {
   private async revisionMismatch(stateId: string): Promise<ConflictException> {
     const current = toFlagEnvironmentView(await this.loadState(stateId));
     return new ConflictException({
-      statusCode: 409,
-      error: 'Conflict',
       code: 'REVISION_MISMATCH',
       message:
         'Someone else changed this flag environment first. Review the current state and try again.',

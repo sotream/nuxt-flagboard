@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../common/enums/role.enum.js';
@@ -15,12 +16,18 @@ export class FlagsController {
 
   @Post()
   @Roles(Role.Admin)
-  create(
+  async create(
     @Param('projectKey') projectKey: string,
     @Body() dto: CreateFlagDto,
     @CurrentUser() actor: AuthenticatedUser,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.flags.create(projectKey, dto, actor);
+    const created = await this.flags.create(projectKey, dto, actor);
+    // RFC 9110 §10.2.2: for a 201, Location is the primary resource that was created. Set only after it was.
+    response.location(
+      `/${ADMIN_PREFIX}/projects/${encodeURIComponent(projectKey)}/flags/${encodeURIComponent(dto.key)}`,
+    );
+    return created;
   }
 
   @Get()

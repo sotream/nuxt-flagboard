@@ -1,3 +1,23 @@
+interface Problem {
+  title?: unknown;
+  detail?: unknown;
+  errors?: unknown;
+}
+
+/** What to show a person for a problem: every invalid field, else the detail, else the title. */
+function problemMessage(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null) return undefined;
+  const { title, detail, errors } = body as Problem;
+  if (Array.isArray(errors)) {
+    const fields = errors
+      .map((error: unknown) => (error as { detail?: unknown } | null)?.detail)
+      .filter((text): text is string => typeof text === 'string');
+    if (fields.length > 0) return fields.join('; ');
+  }
+  if (typeof detail === 'string') return detail;
+  return typeof title === 'string' ? title : undefined;
+}
+
 /** A failed call to the API. `status` is 0 when the server could not be reached at all. */
 export class ApiError extends Error {
   override readonly name = 'ApiError';
@@ -15,7 +35,11 @@ export class ApiError extends Error {
     return this.status === 0;
   }
 
-  /** Builds an error from a non-2xx response, using the server's own message when it sent one. */
+  /**
+   * Builds an error from a non-2xx response. The API answers with RFC 9457 problem details: the message is the `detail`,
+   * or the `detail` of every field in `errors` for a validation failure, or the `title`. Members this code does not know
+   * are ignored (the RFC requires clients to), and `body` keeps them for the callers that do, such as `current`.
+   */
   static async fromResponse(response: Response): Promise<ApiError> {
     let body: unknown;
     try {
@@ -23,13 +47,11 @@ export class ApiError extends Error {
     } catch {
       body = undefined;
     }
-    const message = (body as { message?: unknown } | undefined)?.message;
-    const text = Array.isArray(message)
-      ? message.join('; ')
-      : typeof message === 'string'
-        ? message
-        : undefined;
-    return new ApiError(response.status, text ?? `Request failed (${response.status})`, body);
+    return new ApiError(
+      response.status,
+      problemMessage(body) ?? `Request failed (${response.status})`,
+      body,
+    );
   }
 
   static network(): ApiError {

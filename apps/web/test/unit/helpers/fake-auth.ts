@@ -38,7 +38,7 @@ export function createFakeAuthServer(jar: CookieJar, options: { latencyMs?: numb
     calls.login += 1;
     const body = JSON.parse(String(init.body)) as { password: string };
     if (body.password !== 'correct-password')
-      return json(401, { message: 'Invalid email or password' });
+      return json(401, { status: 401, detail: 'Invalid email or password' });
     const { accessToken, refreshToken } = issue();
     jar.value = refreshToken;
     return json(200, { accessToken, expiresIn: 900, user });
@@ -50,9 +50,10 @@ export function createFakeAuthServer(jar: CookieJar, options: { latencyMs?: numb
       // A replay: revoke everything, so the real holder is signed out too.
       accepted.forEach((token) => revoked.add(token));
       accepted.clear();
-      return json(401, { message: 'Invalid refresh token' });
+      return json(401, { status: 401, detail: 'Invalid refresh token' });
     }
-    if (!accepted.has(sentCookie)) return json(401, { message: 'Invalid refresh token' });
+    if (!accepted.has(sentCookie))
+      return json(401, { status: 401, detail: 'Invalid refresh token' });
     accepted.delete(sentCookie);
     revoked.add(sentCookie);
     const { accessToken, refreshToken } = issue();
@@ -71,7 +72,7 @@ export function createFakeAuthServer(jar: CookieJar, options: { latencyMs?: numb
     calls.api += 1;
     const token = authorization?.replace('Bearer ', '');
     if (!token || !accessTokens.has(token))
-      return json(401, { message: 'Invalid or expired access token' });
+      return json(401, { status: 401, detail: 'Invalid or expired access token' });
     return json(200, [{ key: 'demo' }]);
   }
 
@@ -83,7 +84,7 @@ export function createFakeAuthServer(jar: CookieJar, options: { latencyMs?: numb
     if (path === '/api/v1/auth/refresh') return refresh(sentCookie);
     if (path === '/api/v1/auth/logout') return logout();
     if (path.startsWith('/api/v1/projects')) return projects(authorization);
-    return json(404, { message: 'not found' });
+    return json(404, { status: 404, detail: 'not found' });
   }
 
   return {

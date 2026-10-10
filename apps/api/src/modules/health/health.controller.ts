@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Public } from '../../common/decorators/public.decorator.js';
 
@@ -27,7 +27,7 @@ export class HealthController {
         ),
       ]);
     } catch {
-      throw new HttpException({ status: 'error' }, HttpStatus.SERVICE_UNAVAILABLE);
+      throw new ServiceUnavailableException();
     }
     return { status: 'ok' };
   }
