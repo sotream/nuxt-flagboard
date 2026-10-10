@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { EnvironmentVariables } from '../../infrastructure/config/env.validation.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
+import { JWT_ALGORITHM, JWT_AUDIENCE, JWT_ISSUER } from './auth.constants.js';
 import { AuthService } from './auth.service.js';
 import { RefreshTokenCleanupService } from './refresh-token-cleanup.service.js';
 import { RefreshToken } from './entities/refresh-token.entity.js';
@@ -16,8 +17,13 @@ import { RefreshToken } from './entities/refresh-token.entity.js';
       inject: [EnvironmentVariables],
       useFactory: (env: EnvironmentVariables) => ({
         secret: env.JWT_ACCESS_SECRET,
-        signOptions: { algorithm: 'HS256', expiresIn: env.ACCESS_TOKEN_TTL_SECONDS },
-        verifyOptions: { algorithms: ['HS256'] },
+        signOptions: {
+          algorithm: JWT_ALGORITHM,
+          expiresIn: env.ACCESS_TOKEN_TTL_SECONDS,
+          issuer: JWT_ISSUER,
+          audience: JWT_AUDIENCE,
+        },
+        verifyOptions: { algorithms: [JWT_ALGORITHM], issuer: JWT_ISSUER, audience: JWT_AUDIENCE },
       }),
     }),
   ],

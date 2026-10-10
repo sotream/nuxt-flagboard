@@ -105,6 +105,10 @@ Failures are `FlagboardError` with a `code`: `BAD_CONFIG`, `INVALID_KEY` (401), 
 key on the local client), `RATE_LIMITED` (429), `SERVER` (5xx), `BAD_REQUEST`, `NETWORK`, `TIMEOUT`, `BAD_RESPONSE`.
 Messages are written by the SDK and never contain the API key or content from the response, so they are safe to log.
 
+A 429, and a 503 with a `Retry-After` header, gives the error a `retryAfterMs`: the wait the API asked for, in
+milliseconds, whether the header was seconds or an HTTP-date (capped at one hour). The local client never polls before
+that time. The remote client does not retry by itself; you decide whether to wait and call again.
+
 ## Try it
 
 After `pnpm infra:up`, `pnpm db:migrate` and `pnpm db:seed` (which prints a server key and a client key), start the

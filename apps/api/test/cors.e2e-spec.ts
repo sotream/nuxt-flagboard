@@ -33,7 +33,8 @@ describe('CORS on POST /v1/evaluate', () => {
     expect(response.headers['access-control-allow-origin']).toBe('*');
     expect(response.headers['access-control-allow-methods']).toBe('POST, OPTIONS');
     expect(response.headers['access-control-allow-headers']).toBe('Authorization, Content-Type');
-    expect(response.headers['access-control-max-age']).toBe('86400');
+    // Chromium caps the preflight cache at 7200 s (Firefox 86400), so a larger number would be misleading.
+    expect(response.headers['access-control-max-age']).toBe('7200');
     expect(response.text).toBe('');
   });
 

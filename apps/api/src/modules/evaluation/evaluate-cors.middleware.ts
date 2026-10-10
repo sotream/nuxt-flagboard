@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
-const ONE_DAY_SECONDS = '86400';
+// Chromium caps the preflight cache at 2 hours (Firefox at 24), so a longer value would only look longer than it is.
+const PREFLIGHT_MAX_AGE_SECONDS = '7200';
 
 /**
  * CORS for `POST /v1/evaluate` and nothing else, so a browser on any origin can use a client key through the SDK.
@@ -22,6 +23,6 @@ export function evaluateCors(request: Request, response: Response, next: NextFun
   }
   response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   response.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
-  response.setHeader('Access-Control-Max-Age', ONE_DAY_SECONDS);
+  response.setHeader('Access-Control-Max-Age', PREFLIGHT_MAX_AGE_SECONDS);
   response.status(204).end();
 }

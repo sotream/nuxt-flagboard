@@ -31,3 +31,6 @@ database locks while a person thinks is not an option.
 - Flag metadata (name, description, client visibility, archive) is not versioned: those changes are low risk and
   last write wins, with every change audited.
 - The check is per flag environment, so two admins editing different environments of one flag never conflict.
+- The `revision` is in the body on purpose, not in `ETag` and `If-Match`. [ADR 0014](0014-http-standards-conformance.md)
+  records why, and what the standard pattern would look like if it is ever wanted. The 409 is a problem details
+  response (RFC 9457) with the current state in the extension member `current`.

@@ -180,7 +180,9 @@ hardware, a network between client and server, or a larger dataset.
 
 Each non-obvious choice has a one-page record in [`docs/adr`](docs/adr): the pure core, rollout hashing, refresh
 rotation, the audit log, optimistic locking, key storage, key kinds, the snapshot ETag, SSE over WebSocket, the
-single-instance design, and the SPA with a same-origin proxy and CSP.
+single-instance design, the SPA with a same-origin proxy and CSP, and which HTTP standards the API follows and where it
+deliberately does not ([ADR 0014](docs/adr/0014-http-standards-conformance.md); error format in the
+[error guide](docs/guides/errors.md)).
 
 ## Known limitations
 

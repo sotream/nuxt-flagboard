@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
 import { RetryAfterThrottlerGuard } from './infrastructure/rate-limit/retry-after-throttler.guard.js';
-import { ClientErrorFilter } from './common/filters/client-error.filter.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard.js';
 import { RolesGuard } from './common/guards/roles.guard.js';
@@ -35,7 +34,6 @@ import { UsersModule } from './modules/users/users.module.js';
     HealthModule,
   ],
   providers: [
-    { provide: APP_FILTER, useClass: ClientErrorFilter },
     // Order matters: limit first (before any bcrypt work), then authenticate, then authorize.
     { provide: APP_GUARD, useClass: RetryAfterThrottlerGuard },
     { provide: APP_GUARD, useClass: JwtAuthGuard },

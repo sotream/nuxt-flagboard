@@ -38,5 +38,8 @@ browser. Browsers send changes with ordinary `PATCH` requests.
 - Simple to run and to test; works behind any HTTP proxy that does not buffer responses.
 - The transport is an in-process event bus, so streams only see changes made through the same API instance (see
   the single-instance ADR). Scaling out needs a shared bus such as Postgres `LISTEN/NOTIFY` or Redis.
+- Against the HTML Standard: the stream has the right content type and no caching, but no `retry:` and no
+  `id:`/`Last-Event-ID` resume, because `EventSource` is not used (it cannot send `Authorization`). The heartbeat is a
+  named event. See [ADR 0014](0014-http-standards-conformance.md).
 - One-way only. If the UI ever needs low-latency client-to-server messages (collaborative cursors, say), that is the
   point to reconsider WebSocket.

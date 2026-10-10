@@ -183,7 +183,12 @@ describe('GET /api/v1/projects/:key/audit', () => {
   });
 
   it('offers no way to change or delete events through the API', async () => {
-    await t.http.delete(`/api/v1/projects/${projectKey}/audit`).set(as(adminToken)).expect(404);
-    await t.http.patch(`/api/v1/projects/${projectKey}/audit`).set(as(adminToken)).expect(404);
+    // 405, not 404, since the path exists for reading: the answer lists what is allowed, and writing is not in it.
+    for (const method of ['delete', 'patch', 'put', 'post'] as const) {
+      const response = await t.http[method](`/api/v1/projects/${projectKey}/audit`)
+        .set(as(adminToken))
+        .expect(405);
+      expect(response.headers.allow).toBe('GET, HEAD');
+    }
   });
 });

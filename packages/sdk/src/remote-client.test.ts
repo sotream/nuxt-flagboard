@@ -100,6 +100,49 @@ describe('createRemoteClient', () => {
       ['JSON of the wrong shape', (_req, res) => json(res, 200, { nope: true }), 'BAD_RESPONSE'],
     ];
 
+    it.each([
+      ['seconds', '30', 30_000],
+      ['an HTTP-date', new Date(Date.now() + 90_000).toUTCString(), 90_000],
+    ])(
+      'a 429 with Retry-After in %s gives the error retryAfterMs',
+      async (_label, header, expected) => {
+        const s = await serve((_req, res) =>
+          json(res, 429, {}, { 'Retry-After': header as string }),
+        );
+        const errors: FlagboardError[] = [];
+        const client = createRemoteClient({
+          baseUrl: s.url,
+          key: KEY,
+          onError: (e) => errors.push(e),
+        });
+        await client.evaluate('f', {}, false);
+        expect(errors[0]!.code).toBe('RATE_LIMITED');
+        expect(errors[0]!.retryAfterMs).toBeGreaterThan((expected as number) - 2_000);
+        expect(errors[0]!.retryAfterMs).toBeLessThanOrEqual(expected as number);
+      },
+    );
+
+    it('a 503 carries retryAfterMs too, and a 429 without the header has none', async () => {
+      const busy = await serve((_req, res) => json(res, 503, {}, { 'Retry-After': '5' }));
+      const errors: FlagboardError[] = [];
+      await createRemoteClient({
+        baseUrl: busy.url,
+        key: KEY,
+        onError: (e) => errors.push(e),
+      }).evaluate('f', {}, false);
+      expect(errors[0]).toMatchObject({ code: 'SERVER', status: 503, retryAfterMs: 5_000 });
+      await busy.close();
+      server = undefined;
+
+      const limited = await serve((_req, res) => json(res, 429, {}));
+      await createRemoteClient({
+        baseUrl: limited.url,
+        key: KEY,
+        onError: (e) => errors.push(e),
+      }).evaluate('f', {}, false);
+      expect(errors[1]!.retryAfterMs).toBeUndefined();
+    });
+
     it.each(failing)('for %s', async (_label, handler, code) => {
       const s = await serve(handler);
       const errors: FlagboardError[] = [];

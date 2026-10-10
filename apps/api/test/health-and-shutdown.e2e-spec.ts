@@ -23,7 +23,12 @@ describe('GET /health', () => {
 
       const response = await t.http.get('/health').expect(503);
 
-      expect(response.body).toEqual({ status: 'error' });
+      expect(response.body).toEqual({
+        type: 'about:blank',
+        title: 'Service Unavailable',
+        status: 503,
+        instance: '/health',
+      });
       expect(JSON.stringify(response.body)).not.toContain('hunter2');
       failing.mockRestore();
     } finally {

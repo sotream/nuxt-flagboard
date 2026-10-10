@@ -108,12 +108,35 @@ export class EvaluationController {
   }
 }
 
-/** True when any validator in an `If-None-Match` list equals `etag` (weak validators compare by their value). */
+// RFC 9110 §8.8.3: entity-tag = [ "W/" ] DQUOTE *etagc DQUOTE, where etagc excludes the quote, controls and DEL.
+
+/** The opaque values (with their quotes) of a list of entity-tags, or `undefined` when the header is malformed. */
+function opaqueTags(header: string): string[] | undefined {
+  const tags: string[] = [];
+  let position = 0;
+  while (position < header.length) {
+    const skipped = /[ \t,]*/y;
+    skipped.lastIndex = position;
+    position += skipped.exec(header)?.[0].length ?? 0;
+    if (position >= header.length) break;
+    const tag = /(?:W\/)?("[\x21\x23-\x7e\x80-\xff]*")[ \t]*(?=,|$)/y;
+    tag.lastIndex = position;
+    const match = tag.exec(header);
+    if (!match?.[1]) return undefined;
+    tags.push(match[1]);
+    position = tag.lastIndex;
+  }
+  return tags;
+}
+
+/**
+ * `If-None-Match` for a GET: true when the field is `*` or any listed entity-tag equals `etag` by weak comparison, that
+ * is, when their opaque values match whichever of them is marked weak (RFC 9110 §13.1.2, §8.8.3.2). Commas inside the
+ * quotes belong to the tag, empty list elements are ignored, and a malformed field never matches.
+ */
 export function matchesEtag(header: string | undefined, etag: string): boolean {
   if (!header) return false;
   if (header.trim() === '*') return true;
-  return header
-    .split(',')
-    .map((candidate) => candidate.trim().replace(/^W\//, ''))
-    .includes(etag);
+  const wanted = etag.replace(/^W\//, '');
+  return opaqueTags(header)?.includes(wanted) ?? false;
 }

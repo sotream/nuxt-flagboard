@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import type { Response } from 'express';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import { Roles } from '../../common/decorators/roles.decorator.js';
 import { Role } from '../../common/enums/role.enum.js';
@@ -14,8 +15,15 @@ export class ProjectsController {
 
   @Post()
   @Roles(Role.Admin)
-  create(@Body() dto: CreateProjectDto, @CurrentUser() actor: AuthenticatedUser) {
-    return this.projects.create(dto.key, dto.name, actor);
+  async create(
+    @Body() dto: CreateProjectDto,
+    @CurrentUser() actor: AuthenticatedUser,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const created = await this.projects.create(dto.key, dto.name, actor);
+    // RFC 9110 §10.2.2: for a 201, Location is the primary resource that was created. Set only after it was.
+    response.location(`/${ADMIN_PREFIX}/projects/${encodeURIComponent(dto.key)}`);
+    return created;
   }
 
   @Get()

@@ -138,9 +138,12 @@ describe('requests', () => {
             }),
             { status: 200 },
           )
-        : new Response(JSON.stringify({ message: 'Changed elsewhere', current: { revision: 5 } }), {
-            status: 409,
-          }),
+        : new Response(
+            JSON.stringify({ status: 409, detail: 'Changed elsewhere', current: { revision: 5 } }),
+            {
+              status: 409,
+            },
+          ),
     );
     const session = createSession({ fetch: fetcher as unknown as typeof fetch });
     await session.login('e', 'p');

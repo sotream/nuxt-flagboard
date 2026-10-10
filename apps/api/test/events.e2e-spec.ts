@@ -1,4 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
+import { JWT_AUDIENCE, JWT_ISSUER } from '../src/modules/auth/auth.constants.js';
 import { Role } from '../src/common/enums/role.enum.js';
 import { StreamRegistry } from '../src/modules/events/stream-registry.service.js';
 import { startSession } from './helpers/api-session.js';
@@ -174,7 +175,7 @@ describe('stream limit per user', () => {
   it('does not send evicted when a stream ends for another reason', async () => {
     const shortLived = await new JwtService({ secret: process.env.JWT_ACCESS_SECRET }).signAsync(
       { sub: s.admin.id, email: s.admin.email, role: Role.Admin },
-      { expiresIn: 1 },
+      { expiresIn: 1, issuer: JWT_ISSUER, audience: JWT_AUDIENCE },
     );
     const stream = await connect(shortLived);
     await stream.waitFor((e) => e.type === 'ready');
@@ -213,7 +214,7 @@ describe('token expiry', () => {
   it('ends the stream when the access token expires, so the client reconnects with a fresh one', async () => {
     const shortLived = await new JwtService({ secret: process.env.JWT_ACCESS_SECRET }).signAsync(
       { sub: s.admin.id, email: s.admin.email, role: Role.Admin },
-      { expiresIn: 2 },
+      { expiresIn: 2, issuer: JWT_ISSUER, audience: JWT_AUDIENCE },
     );
     const stream = await connect(shortLived);
     await stream.waitFor((e) => e.type === 'ready');
