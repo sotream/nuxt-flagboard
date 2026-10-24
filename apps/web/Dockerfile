@@ -20,7 +20,7 @@ RUN node apps/web/scripts/check-external-refs.mjs apps/web/.output/public apps/w
 # Fill the Content-Security-Policy with the hashes of the inline scripts Nuxt just generated.
 RUN node apps/web/docker/render-nginx-conf.ts apps/web/.output/public apps/web/docker/default.conf.template /default.conf.template
 
-FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:b9241c6e7b8e9a862f129d8d4199ab64b10390949a78bdd5603379b32c844083
+FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:b5047b9b76845eac124358373c6852377c52e4b05834a47647e955dd91cb8f1e
 ENV API_UPSTREAM=http://api:4010
 COPY --from=build /default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /repo/apps/web/.output/public /usr/share/nginx/html
