@@ -12,3 +12,7 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - happy-dom@20.14.6
+
+overrides:
+  # GHSA-q7qp-rjg7-q26m: @nestjs/platform-express pins multer 2.4.0 exactly, fix is 2.5.0. Remove once platform-express pins >= 2.5.0.
+  multer: 2.5.0
