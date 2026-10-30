@@ -29,8 +29,13 @@ function httpExceptionProblem(exception: HttpException): ProblemDetails {
   const code =
     members.code ?? (status === HttpStatus.TOO_MANY_REQUESTS ? 'RATE_LIMITED' : undefined);
   // A server error never repeats its message: this API is public, and such a message could reveal internals.
+  // Nest 12.3 wraps the body-parser error as an HttpException with its raw text; keep the one message clients see.
   const detail =
-    status >= 500 ? undefined : detailOf(typeof body === 'string' ? body : members.message);
+    status === HttpStatus.PAYLOAD_TOO_LARGE
+      ? 'Request body too large'
+      : status >= 500
+        ? undefined
+        : detailOf(typeof body === 'string' ? body : members.message);
   const extensions = Object.fromEntries(
     Object.entries(members).filter(([name]) => !NEST_MEMBERS.has(name) && name !== 'code'),
   );
