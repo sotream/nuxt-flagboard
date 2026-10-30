@@ -75,6 +75,11 @@ describe('toProblem (RFC 9457)', () => {
     });
   });
 
+  it('keeps one message for a 413 that Nest wraps as an HttpException', () => {
+    const problem = toProblem(new HttpException('request entity too large', 413));
+    expect(problem.detail).toBe('Request body too large');
+  });
+
   it('hides everything about an unexpected error', () => {
     const problem = toProblem(new Error('connect ECONNREFUSED 10.0.0.5 password=hunter2'));
     expect(problem).toEqual({ type: 'about:blank', title: 'Internal Server Error', status: 500 });
