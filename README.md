@@ -195,9 +195,9 @@ deliberately does not ([ADR 0014](docs/adr/0014-http-standards-conformance.md); 
   web image's nginx configuration. `pnpm dev` and `nuxt dev` do not send it. `style-src` allows `'unsafe-inline'`.
 - **Browsers tested:** Chromium only. Firefox and Safari were not tested, including the CSP hashes and the
   rendering of the typefaces and the rollout meter.
-- **CI ran on GitHub only recently.** The `CI` workflow has run on GitHub since 2026-10-30 and is green on `main`
-  (see the badge). The other workflows were not all observed running on GitHub; they pass `actionlint` and were
-  checked by hand and with local equivalents of their commands.
+- **CI is young.** The `CI` and `Dependency audit` workflows have run on GitHub since 2026-10-30 and are green on
+  `main` (see the badge). The `dependabot-auto-merge` workflow has so far failed to start (`startup_failure`), so
+  it is not proven.
 - **No deployment target.** There are Dockerfiles for both apps and a Compose file for PostgreSQL only; there is no
   Compose stack for the whole system, no Terraform and no hosting. The web image's nginx resolves the API host name
   once at start, so the API must be up first.
