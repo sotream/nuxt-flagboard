@@ -27,7 +27,7 @@
     "@nestjs/core": "^12.3.2",
     "@nestjs/jwt": "^12.0.3",
     "@nestjs/platform-express": "^12.3.2",
-    "@nestjs/swagger": "^12.0.5",
+    "@nestjs/swagger": "^12.1.0",
     "@nestjs/throttler": "^6.7.1",
     "@nestjs/typeorm": "^12.0.2",
     "bcryptjs": "^3.0.3",
@@ -53,9 +53,9 @@
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "supertest": "^7.3.1",
     "typescript": "~6.0.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.1.0"
   }
 }
