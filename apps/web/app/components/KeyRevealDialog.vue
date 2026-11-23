@@ -48,8 +48,8 @@ async function copy(): Promise<void> {
       <h2 :id="titleId" class="text-section font-semibold">Copy your new {{ kind }} key</h2>
       <p :id="descriptionId" class="text-small text-muted">
         <strong>This is the only time the full key is shown.</strong> Flagboard stores only a hash
-        of it, so it cannot be shown again. “{{ name }}” works in <strong>{{ environment }}</strong
-        >.
+        of it, so it cannot be shown again. “{{ name }}” works in
+        <strong>{{ environment }}</strong>.
         <span v-if="kind === 'server'">Keep it secret: it can read all flag rules.</span>
         <span v-else
           >It is safe to put in browser or app code: it can only evaluate client-visible

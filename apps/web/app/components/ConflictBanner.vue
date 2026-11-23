@@ -44,8 +44,8 @@ onMounted(() => void nextTick(() => heading.value?.focus()));
       {{ environment }} was changed while you were working
     </h3>
     <p class="text-body text-ink">
-      {{ who }} made a change at <time :datetime="when">{{ formatDateTime(when) }}</time
-      >. Nothing you typed has been lost, and nothing has been overwritten.
+      {{ who }} made a change at <time :datetime="when">{{ formatDateTime(when) }}</time>. Nothing
+      you typed has been lost, and nothing has been overwritten.
     </p>
 
     <dl class="space-y-1 text-body text-ink">
