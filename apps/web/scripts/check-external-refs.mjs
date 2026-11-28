@@ -38,11 +38,11 @@ const ALLOWED = [
   { exact: 'http://www.w3.org/1999/xlink', reason: 'the XLink XML namespace' },
   { exact: 'http://www.w3.org/1998/Math/MathML', reason: 'the MathML XML namespace (Vue runtime)' },
   {
-    exact: 'https://a.invalid/probe/',
+    exact: 'https://a.invalid',
     reason: 'base for new URL() in the router; .invalid is reserved, never requested',
   },
   {
-    exact: 'https://b.invalid/probe/',
+    exact: 'http://b.invalid',
     reason: 'base for new URL() in the router; .invalid is reserved, never requested',
   },
   { exact: 'https://tailwindcss.com', reason: 'the licence banner comment of the generated CSS' },
